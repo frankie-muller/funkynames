@@ -24,7 +24,7 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
 const exact = (n: number) => (n <= Number.MAX_SAFE_INTEGER ? fmt(n) : compact.format(n));
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
-const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const plural = (n: number, w: string) => `${fmt(n)} ${w}${n === 1 ? '' : 's'}`;
 
 const status = $('sr-status');
 /** One polite announcement for assistive tech; replaces, never stacks. */
@@ -264,102 +264,153 @@ for (const el of [labWords, rate, targets]) {
   el.addEventListener('change', announceLab);
 }
 
-// ── Is this safe for… ───────────────────────────────────────────────
+// ── Is this safe for… ────────────────────────────────────────────────────────
+// Written for a reader who does not know what a bit is. A bit is defined once
+// in the markup; every verdict leads with a comparison a person can feel and
+// puts the bits in parentheses. The truth of the verdict — bits against the
+// bar — is untouched; the copy around it is what changed.
 
 interface UseCase {
   id: string;
   label: string;
-  /** Bits this use actually needs, and why that number. */
+  /** Bits this use actually needs. 0 means guessing is not the threat. */
   bits: number;
-  note: string;
+  /** One paragraph, plain English, carrying the bar's comparison. */
+  plainWhy: string;
   rateLimited: boolean;
 }
 
 const USE_CASES: UseCase[] = [
-  {
-    id: 'username', label: 'Username or display handle', bits: 0,
-    note: 'Public by definition, so guessing is not a threat. What matters is collisions — check uniqueness when you issue one.',
-    rateLimited: false,
-  },
-  {
-    id: 'room', label: 'Room / lobby code', bits: 28,
-    note: 'Short-lived and low-value, but joinable by anyone who guesses. Fine at modest entropy provided rooms expire.',
-    rateLimited: true,
-  },
-  {
-    id: 'invite', label: 'Invite or share link', bits: 45,
-    note: 'Long-lived and grants access. Many are outstanding at once, which dilutes the keyspace — this is where population bites.',
-    rateLimited: true,
-  },
-  {
-    id: 'reset', label: 'Password reset token', bits: 60,
-    note: 'Single-use, short-lived, and full account takeover if guessed. Should be minted per request and expire in minutes.',
-    rateLimited: true,
-  },
-  {
-    id: 'apikey', label: 'API key or bearer token', bits: 128,
-    note: 'Rarely rate-limited in practice, and often never rotated, so entropy has to carry the whole load. Honestly: use random bytes, not words. Words are for humans to read aloud.',
-    rateLimited: false,
-  },
+  { id: 'username', label: 'Username or display handle', bits: 0, rateLimited: false,
+    plainWhy: 'Everyone can already see it, so nobody gains anything by guessing it — the only thing that can go wrong is handing two people the same name, and you catch that by checking when you issue one.' },
+  { id: 'room', label: 'Room / lobby code', bits: 28, rateLimited: true,
+    plainWhy: 'A stranger who guesses it can walk into the game, but the room dies within the hour and there\'s little to steal, so a few hundred million possibilities (28 bits — about a 9-digit number) is plenty, as long as rooms really do expire and you slow down repeated join attempts.' },
+  { id: 'invite', label: 'Invite or share link', bits: 45, rateLimited: true,
+    plainWhy: 'It lives for months, it opens a door, and thousands may be out there at once — a guesser only has to hit any one of them — so it needs about 35 trillion possibilities (45 bits — roughly an 8-character random password).' },
+  { id: 'reset', label: 'Password reset token', bits: 60, rateLimited: true,
+    plainWhy: 'Guess this one and you own the account, so even though it should only live for minutes it needs about a billion billion possibilities (60 bits — a 10-character random password of letters and digits).' },
+  { id: 'apikey', label: 'API key or bearer token', bits: 128, rateLimited: false,
+    plainWhy: 'It\'s a permanent password that machines get to try as fast as they like, so it needs 128 bits — a number 39 digits long, as many possibilities as a 22-character random password. Words can\'t get there at a readable length: ten words from every pool on this page is about 116 bits, so this panel will never say yes here. Honestly, that\'s a job for random bytes, not words; words are for saying out loud.' },
 ];
 
 const useCaseSelect = $<HTMLSelectElement>('use-case');
 for (const u of USE_CASES) { useCaseSelect.append(new Option(u.label, u.id)); }
+
+/** "about 2.8 million" — mirrors the library's readable scales, with a plain cap past 10^15. */
+function about(n: number): string {
+  if (n >= 1e15) { return 'more than a million billion'; }
+  for (const [size, label] of [[1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million'], [1e3, 'thousand']] as const) {
+    if (n >= size) { return `about ${(n / size).toFixed(1)} ${label}`; }
+  }
+  return `about ${Math.round(n)}`;
+}
+
+/** A duration a person can react to. Never "0.0 seconds". */
+function dur(seconds: number): string {
+  if (seconds < 1) { return 'less than a second'; }
+  if (seconds < 60) { return `about ${plural(Math.round(seconds), 'second')}`; }
+  return humanizeSeconds(seconds);
+}
+
+/** Same band edges as describeBits(), worded as things a teenager can picture. */
+function compare(bits: number): string {
+  if (bits < 20) { return 'about as many possibilities as a 6-digit number, or fewer'; }
+  if (bits < 30) { return 'somewhere between a 7-digit and a 9-digit number'; }
+  if (bits < 40) { return 'roughly a 6-character random password'; }
+  if (bits < 50) { return 'roughly an 8-character random password of letters and digits'; }
+  if (bits < 70) { return 'a 10-to-12-character random password'; }
+  if (bits < 128) { return 'longer than any password a person would type — 12 to 21 random characters'; }
+  return 'a 22-character random password, which is what real API keys are made of';
+}
+
+const guesses = (n: number) => `${fmt(n)} ${n === 1 ? 'guess' : 'guesses'} a second`;
 
 function syncSafety(): void {
   const useCase = USE_CASES.find((u) => u.id === useCaseSelect.value) as UseCase;
   const words = Number(labWords.value);
   const poolSize = activePoolSize();
   const out = $('safety-readout');
+  const card = (cls: string, head: string, why: string, what: string) => `
+    <div class="verdict ${cls}">
+      <span class="k">Verdict</span>
+      <b>${head}</b>
+      ${why ? `<p class="vline"><span class="lead">Why:</span> ${why}</p>` : ''}
+      ${what ? `<p class="vline"><span class="lead">What to change:</span> ${what}</p>` : ''}
+    </div>`;
 
+  // 1. Nothing qualifies at all.
   if (poolSize === 0) {
-    out.innerHTML = '<p class="empty">No pool to measure — widen the word length or turn a pool back on above.</p>';
+    out.innerHTML = `
+      <div class="verdict neutral"><span class="k">Verdict</span><b>Nothing to measure yet.</b>
+      <p class="vline">With the pools you have turned on and the word-length range at the top of the page, not a single word qualifies, so no codes can be made — and there is no verdict to give. Widen the range, or turn a pool back on, and this panel will fill in.</p></div>`;
+    return;
+  }
+
+  // 2. Username: guessing is not the threat; collisions are.
+  if (useCase.bits === 0) {
+    let birthday: string;
+    try {
+      const h = handleEntropy(lengthRange());
+      birthday = `You can issue about ${fmt(h.birthday50)} handles before that becomes a coin flip — far fewer than the total number of possible names, for the same reason a class of 23 kids usually has two people who share a birthday.`;
+    } catch {
+      birthday = 'At this word-length range one of the handle\'s three slots has no words in it, so no handles can be made and there is no collision figure to give — widen the range at the top of the page.';
+    }
+    out.innerHTML = card('good', 'Safe — nobody needs to guess a username.',
+      `it\'s shown to everyone, so guessing it gains nothing. The one thing that can go wrong is handing two people the same name. ${birthday}`,
+      'nothing in the recipe. Check for a match when you issue a handle and re-roll on a clash; when re-rolls start happening often, that\'s your signal to add a fourth slot. One catch: if your app ever treats the handle as a secret — a private profile link, a log-in-by-handle flow — it stopped being a username. Pick that use from the list instead and read the real verdict.')
+      + `<p class="foot">${useCase.plainWhy}</p>`;
+    return;
+  }
+
+  // 3. One word in the pool: the only way to zero bits, so "0.0" never prints.
+  if (poolSize === 1) {
+    out.innerHTML = card('bad', 'No — there\'s only one word to choose from.',
+      'with a single word in the pool, every code comes out identical — that one word, over and over — so there is exactly one possible code and nothing to guess. More words won\'t help: one choice times one choice is still one choice, however many you add.',
+      'turn on more pools, or widen the word-length range at the top of the page, so each word has something to choose from.')
+      + `<p class="foot">${useCase.plainWhy}</p>`;
     return;
   }
 
   const e = entropyOfDraws(poolSize, words);
+  const ok = e.bits >= useCase.bits;
+  const atk = attackModel(e.keyspace);
+  const wanted = logScale(Number(targets.value), 0, 7);
+  const guess = timeToGuess(e.keyspace, atk.perSec, atk.targets);
+  const slow = timeToGuess(e.keyspace, 1 / 60, atk.targets);
+  const tries = atk.clamped ? 'just one' : about(guess.attempts);
+  const clampedNote = atk.clamped ? ' There are more live codes out there than there are possible codes, so every single guess lands on someone\'s.' : '';
+  const attack = `Someone guessing at random — ${guesses(atk.perSec)}, with ${plural(wanted, 'live code')} any one of which counts as a hit — should expect to land one after ${tries} guesses, ${dur(guess.seconds)}.${clampedNote}`;
 
-  if (useCase.bits === 0) {
-    // Measured at the same length range as everything else on the page.
-    let collide = '';
-    try {
-      const h = handleEntropy(lengthRange());
-      collide = `A handle collides after about ${fmt(h.birthday50)} issued names at this length range — that is when "pick another" starts happening often enough to notice, and when a fourth slot earns its place.`;
-    } catch {
-      collide = 'At this length range the handle shape has no words in one of its slots, so there is no collision figure to give — widen the range at the top of the page.';
+  const rateLine = useCase.rateLimited
+    ? `<p class="foot">The cheap half of the answer: you decide how fast people are allowed to guess. Let them try once a minute instead of ${atk.perSec === 1 ? 'once' : `${fmt(atk.perSec)} times`} a second and the same ${words}-word codes hold out for ${dur(slow.seconds)} instead of ${dur(guess.seconds)}. That isn\'t a bonus on top of the maths — it\'s half of it, and the bar for this use assumes you\'re doing it. If a code lives longer than ${dur(guess.seconds)} and you have no throttle, treat the answer as no.</p>`
+    : '';
+
+  if (ok) {
+    const why = `a ${words}-word code from these pools is ${compare(e.bits)} (${e.bits.toFixed(1)} bits; this use needs ${useCase.bits}), so there are more possible codes than the job calls for. With ${plural(wanted, 'live code')} out there and ${guesses(atk.perSec)}, someone guessing at random should expect their first hit after ${tries} guesses — ${dur(guess.seconds)}.`;
+    if (guess.seconds < 86_400) {
+      // The lab's own "bad" band: the bits clear the bar but the sliders beat it.
+      out.innerHTML = card('warn', `Yes, but — ${plural(words, 'word')} clears the bar, and these sliders still beat it.`, why,
+        `careful — enough bits does not mean safe at these slider settings. ${plural(wanted, 'live code')} and ${guesses(atk.perSec)} still means a hit in ${dur(guess.seconds)}. Expire old codes, or slow the guesser down (see the note below); one extra word also multiplies the time by the size of the pool.`)
+        + `<p class="foot">${useCase.plainWhy}</p>${rateLine}`;
+      return;
     }
-    out.innerHTML = `
-      <div class="verdict good">
-        <span class="k">Verdict</span><b>Entropy is not the question here</b>
-        <i>${useCase.note}</i>
-      </div>
-      <p class="foot">${collide}</p>`;
+    out.innerHTML = card('good', `Yes — ${plural(words, 'word')} clears the bar for this.`, why,
+      'nothing, as long as the note below holds. Keep an eye on the two sliders, though: more live codes or faster guessing shortens that time, and one extra word multiplies it by the size of the pool.')
+      + `<p class="foot">${useCase.plainWhy}</p>${rateLine}`;
     return;
   }
 
-  const ok = e.bits >= useCase.bits;
-  // The remedy is measured against the SAME pool the verdict used — the
-  // toggled pools at this length range — not the whole corpus. A pool of one
-  // word has zero bits per word, so guard the division.
-  const perWord = poolSize > 1 ? Math.log2(poolSize) : 0;
-  const needWords = perWord > 0 ? Math.max(1, Math.ceil(useCase.bits / perWord)) : Infinity;
-  const remedy = Number.isFinite(needWords)
-    ? `you need ${plural(needWords, 'word')} (${entropyOfDraws(poolSize, needWords).bits.toFixed(1)} bits) from this pool`
-    : 'this pool cannot reach it at any length';
-
-  const atk = attackModel(e.keyspace);
-  out.innerHTML = `
-    <div class="verdict ${ok ? 'good' : 'bad'}">
-      <span class="k">Verdict</span>
-      <b>${plural(words, 'word')} ${words === 1 ? 'is' : 'are'} ${ok ? 'enough' : 'not enough'}</b>
-      <i>${e.bits.toFixed(1)} bits against a ${useCase.bits}-bit bar${ok ? '' : ` — ${remedy}`}</i>
-    </div>
-    <p class="foot">${useCase.note}${
-      useCase.rateLimited
-        ? ' <strong>Rate limiting is doing half the work here:</strong> at one attempt per minute instead of the slider’s rate, the same keyspace holds for ' +
-          humanizeSeconds(timeToGuess(e.keyspace, 1 / 60, atk.targets).seconds) + '.'
-        : ''
-    }</p>`;
+  // No. The remedy is measured against the SAME pool the verdict used.
+  const perWord = Math.log2(poolSize);
+  const needWords = Math.max(1, Math.ceil(useCase.bits / perWord));
+  const sliderMax = Number(labWords.max) || 10;
+  const pill = needWords <= sliderMax
+    ? `<span class="pill">Use ${plural(needWords, 'word')}</span><span class="pill-cap">${entropyOfDraws(poolSize, needWords).bits.toFixed(1)} bits from these pools — clears the bar</span> Every word you add multiplies the number of possible codes by the pool size. Or turn more pools on so each word has more to choose from.`
+    : `<span class="pill">More words than the slider allows</span><span class="pill-cap">turn more pools on instead, or use random bytes for this job</span> Every word you add multiplies the number of possible codes by the pool size.`;
+  out.innerHTML = card('bad', `No — ${plural(words, 'word')} is not enough for this.`,
+    `there are too few possible codes. A ${words}-word code from these pools is ${compare(e.bits)} (${e.bits.toFixed(1)} bits), and this use needs ${useCase.bits}. Every missing bit halves the time a guesser needs, so the gap is bigger than the two numbers look. ${attack}`,
+    pill)
+    + `<p class="foot">${useCase.plainWhy}</p>${rateLine}`;
 }
 
 useCaseSelect.addEventListener('change', syncSafety);

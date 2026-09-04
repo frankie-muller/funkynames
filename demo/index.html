@@ -131,6 +131,17 @@
   .verdict.bad  { border-color:var(--bad);  background:var(--bad-bg); }
   .verdict.bad b, .verdict.bad .k { color:var(--bad); }
   .verdict i { color:var(--ink-2); }
+  .verdict.neutral { border-color:var(--rule); background:var(--surface-2); }
+  .verdict.neutral b, .verdict.neutral .k { color:var(--ink-2); }
+  .verdict .vline { font-size:14px; line-height:1.55; color:var(--ink-2); margin:8px 0 0; max-width:70ch; }
+  .verdict .lead { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em;
+                   text-transform:uppercase; color:var(--ink-3); margin-right:4px; }
+  .verdict .pill { display:inline-block; font-family:'Bricolage Grotesque',sans-serif; font-weight:600;
+                   font-size:14px; color:var(--ink); background:var(--surface); border:1px solid var(--accent);
+                   border-radius:99px; padding:3px 11px; margin:2px 8px 2px 0; }
+  .verdict .pill-cap { display:block; font-family:'IBM Plex Mono',monospace; font-size:11px;
+                       color:var(--ink-3); margin:2px 0 8px; }
+  .bitline { margin-top:12px; font-size:14px; }
 
   .foot { font-size:13.5px; color:var(--ink-2); margin:12px 0 0; max-width:64ch; }
   .foot strong { color:var(--ink); }
@@ -242,10 +253,16 @@
   <section>
     <h2>Is this safe for…</h2>
     <p class="lede">
-      Judges the <em>Take it apart</em> settings — its pools, its word count, its word length — against
-      what each use actually demands. The codes above are just examples; this panel measures the shape, not a specific code.
+      Same settings as <em>Take it apart</em>. Pick what you'd use a code for and you get a yes or a
+      no. Each use has a <strong>bar</strong>: the number of possible codes it needs before guessing
+      stops being worth an attacker's time. The codes above are only examples; this panel measures
+      the recipe, not any one code.
     </p>
     <select id="use-case" aria-label="Use case"></select>
+    <p class="lede bitline">
+      A <strong>bit</strong> is one coin-flip of randomness, and every extra bit doubles the number of
+      possible codes — 10 bits is about a thousand, 20 about a million, 30 about a billion.
+    </p>
     <div id="safety-readout" style="margin-top:16px"></div>
   </section>
 
