@@ -10,8 +10,8 @@ Everyone else pairs a plain adjective with a plain animal, so you get `happy-ott
 **▶ [Try it in your browser](https://frankie-muller.github.io/funkynames)** — roll names, toggle pools, and watch the entropy move.
 
 ```
-janissary-cheems-zircon        generateHandle()   readable, 28.8 bits
-graphene-brief-troll-shaolin   generateCode()     flat draws, 44.7 bits
+janissary-cheems-zircon        generateHandle()   readable, 29.3 bits
+graphene-brief-troll-shaolin   generateCode()     flat draws, 45.2 bits
 ```
 
 Zero runtime dependencies. CSPRNG by default. Runs in Node, browsers and React Native.
@@ -27,11 +27,11 @@ A three-word name *feels* about as unguessable as a password. It isn't, and the 
 ```ts
 import { codeEntropy, timeToGuess } from 'funkynames';
 
-const e = codeEntropy(3);            // 33.5 bits — "roughly a 6-character password"
-timeToGuess(e.keyspace, 50, 10_000); // → "6.9 hours"
+const e = codeEntropy(3);            // 33.9 bits — "roughly a 6-character password"
+timeToGuess(e.keyspace, 50, 10_000); // → "9.1 hours"
 ```
 
-Three words, 12.4 billion combinations, and a determined attacker gets one in an afternoon. That number is the reason this repo exists.
+Three words, 16.3 billion combinations, and a determined attacker gets one inside a working day. That number is the reason this repo exists.
 
 ## Install
 
@@ -76,13 +76,13 @@ Flat draws from every pool merged. Any word, any position: more bits per word, l
 import { codeEntropy, handleEntropy, timeToGuess, describeBits, wordsForBits } from 'funkynames';
 
 codeEntropy(4);
-// { keyspace: 28_622_168_300_961, bits: 44.70, birthday50: 6_299_054, readable: '28.6 trillion' }
+// { keyspace: 41_492_200_805_136, bits: 45.24, birthday50: 7_584_156, readable: '41.5 trillion' }
 
-describeBits(44.70);
+describeBits(45.24);
 // 'comparable to a 4-word Diceware passphrase — a reasonable rate-limited credential'
 
 wordsForBits(60);
-// { words: 6, achieved: { bits: 67.1, ... } }   ← state the security, get the shape
+// { words: 6, achieved: { bits: 67.9, ... } }   ← state the security, get the shape
 ```
 
 ### Checking a name
@@ -104,9 +104,9 @@ Entropy is just *how many equally likely outcomes, expressed as bits*. Each bit 
 
 ### Question 1 — will two users get the same name?
 
-The trap is the birthday paradox. A 28.8-bit handle space holds 470 million names, so it feels like you'd need hundreds of millions of users before a clash.
+The trap is the birthday paradox. A 29.3-bit handle space holds 647.2 million names, so it feels like you'd need hundreds of millions of users before a clash.
 
-**You need about 25,500.** Collisions arrive at the *square root* of the keyspace, not the total.
+**You need about 30,000.** Collisions arrive at the *square root* of the keyspace, not the total.
 
 That's fine — check uniqueness when you issue one and reroll on a clash. It just tells you when rerolls start happening often enough to notice, and that's the signal to add a slot.
 
@@ -119,18 +119,18 @@ This is the one that matters when the string is a credential. And here's what mo
 So the odds per guess aren't `1 / keyspace`, they're `live_targets / keyspace`. A large keyspace gets **diluted by a large population**:
 
 ```ts
-const e = codeEntropy(3);                  // 33.5 bits, 12.4 billion
-timeToGuess(e.keyspace, 50, 1);            // one target      → '7.9 years'
-timeToGuess(e.keyspace, 50, 10_000);       // ten thousand    → '6.9 hours'
+const e = codeEntropy(3);                  // 33.9 bits, 16.3 billion
+timeToGuess(e.keyspace, 50, 1);            // one target      → '10.4 years'
+timeToGuess(e.keyspace, 50, 10_000);       // ten thousand    → '9.1 hours'
 ```
 
-Same keyspace, same attacker. Ten thousand outstanding invite links turned eight years into an afternoon.
+Same keyspace, same attacker. Ten thousand outstanding invite links turned a decade into a working day.
 
 Three levers, and the cheapest one is free:
 
 | Lever | Effect | Cost |
 |---|---|---|
-| **Add a word** | +11 bits — 6.9 hours becomes **1.8 years** | one word |
+| **Add a word** | +11 bits — 9.1 hours becomes **2.6 years** | one word |
 | **Expire them** | linear — halve what's outstanding, double the time | some plumbing |
 | **Rate limit** | linear — 50/sec down to 1/min makes it centuries | ~nothing |
 
@@ -140,9 +140,9 @@ Three levers, and the cheapest one is free:
 
 | Words | Bits | Verdict |
 |---|--:|---|
-| 3 | 33.5 | roughly a 6-character random password |
-| **4** | **44.7** | comparable to a 4-word Diceware passphrase |
-| 6 | 67.1 | brute force impractical even unthrottled |
+| 3 | 33.9 | roughly a 6-character random password |
+| **4** | **45.2** | comparable to a 4-word Diceware passphrase |
+| 6 | 67.9 | brute force impractical even unthrottled |
 
 Three words is enough for a name nobody is hunting, and not enough for anything a stranger profits from guessing. The fourth word costs one word and buys eleven bits — the cheapest security here. So four is what you get, and three is what you opt into.
 
@@ -152,50 +152,50 @@ Restricting word length narrows the pool, and the library reports the real numbe
 
 | Range | Bits at 4 words |
 |---|--:|
-| all | 44.7 |
-| 3–5 chars | 41.3 |
-| 6–8 chars | 39.6 |
-| 7–8 chars | **32.1** |
+| all | 45.2 |
+| 3–5 chars | 41.5 |
+| 6–8 chars | 40.2 |
+| 7–8 chars | **33.4** |
 
-Long words only looks tidy and costs you twelve bits, because only 259 of 2,313 words qualify.
+Long words only looks tidy and costs you twelve bits, because only 328 of 2,538 words qualify.
 
 ## The words
 
-**6 pools · 2,485 words · 2,313 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
+**6 pools · 2,710 words · 2,538 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
 
 Most generators pair a plain adjective with a plain animal, so you get `happy-otter` and `brave-badger` forever. These pools pull from martial arts, chess, dinosaurs, internet slang, retro-futurist transport, workshop tools, root vegetables, and monster folklore from four continents. What comes out is odd on purpose.
 
-### 🥷 `ninjactives` — 754
+### 🥷 `ninjactives` — 774
 
 *Ninja + adjectives.* Descriptors with something at stake. Starts in ordinary English and keeps going: plain adjectives, then martial arts, then chess vocabulary, then a long run of music genres used as attitude.
 
 > `salty` · `eerie` · `sticky` · `aikido` · `samurai` · `janissary` · `fianchetto` · `citypop` · `taiko` · `drone` · `mashup`
 
-### ⚡ `verbtrics` — 365
+### ⚡ `verbtrics` — 395
 
 *Verbs + metrics.* Motion and measurement, colliding with a big seam of playful, faintly British adjectives that sound like they were invented for a children's book and mostly weren't.
 
 > `buzz` · `snap` · `spinup` · `zepto` · `drift` · `fizzy` · `spiffy` · `plonky` · `twonky` · `wobbly` · `pesky` · `chortle` · `humbug`
 
-### 🌸 `kawaiiolors` — 345
+### 🌸 `kawaiiolors` — 372
 
 *Kawaii + colours.* Colour words, cute-adjacent Japanese, tactile textures — and then, unexpectedly, a workshop: the tools and vessels you'd find in a forge.
 
 > `aqua` · `dijon` · `vermilion` · `neko` · `sakura` · `milky` · `gritty` · `anvil` · `forge` · `loom` · `vial` · `homunculus`
 
-### 😤 `memactions` — 504
+### 😤 `memactions` — 518
 
 *Memes + actions.* Internet-native slang sitting directly beside 1950s retro-futurist transport, which turns out to be a very good combination.
 
 > `susmax` · `okboom` · `stonks` · `yeet` · `drifter` · `telepod` · `warpjet` · `timecar` · `flycar` · `skybus` · `wormax`
 
-### 🌍 `biome` — 276
+### 🌍 `biome` — 340
 
 *Living and growing things.* Animals, then dinosaurs, then the entire vegetable aisle, then folklore creatures — with no dividing line between them.
 
 > `alpaca` · `krill` · `marten` · `triceratops` · `gorgosaurus` · `iguanodon` · `parsnip` · `radish` · `yam` · `pixie` · `nessie`
 
-### 👹 `monsterials` — 241
+### 👹 `monsterials` — 311
 
 *Monsters + materials.* Elements and invented alloys at one end, and at the other the deepest seam in the corpus: monster folklore from Europe, Japan and Mesoamerica, mostly untranslated.
 
@@ -209,7 +209,7 @@ hyperpop-anvil-triceratops    samurai-vermilion-nuckelavee
 aikido-milky-quetzalcoatl     wobbly-forge-iguanodon
 ```
 
-Curated for how they *sound together*, not for coverage. That's the whole editorial position: a name should be memorable enough that someone reads it aloud.
+Curated for how they *sound together*, not for coverage — and, since the first release, **grown**: 225 words were proposed by language models against each pool's voice brief, filtered by the harness rules, and accepted only when at least two of three independent adversarial judges (lexical validity, register fit, taste and safety) agreed. See [Known gaps](#known-gaps). That's the whole editorial position: a name should be memorable enough that someone reads it aloud.
 
 Pools are exported, so you can build your own shapes from them:
 
@@ -239,10 +239,10 @@ npm test
 ```
 
 ```
-POOLS      6 pools · 2487 words · 2315 distinct
-HANDLE      28.81 bits ·  470.2 million · collides at 25,530
-CODE x3     33.53 bits ·   12.4 billion · collides at 131,145
-CODE x4     44.71 bits ·   28.7 trillion · collides at 6,309,952
+POOLS      6 pools · 2710 words · 2538 distinct
+HANDLE      29.27 bits ·  647.2 million · collides at 29,954
+CODE x3     33.93 bits ·   16.3 billion · collides at 150,543
+CODE x4     45.24 bits ·   41.5 trillion · collides at 7,584,156
 ✅ ALL GREEN
 ```
 
@@ -254,6 +254,7 @@ The harness asserts word hygiene (no duplicates, no separators or capitals hidin
 
   Two survivors were found later, by reading the deployed demo's own output rather than by any test: `edmont` (the system dictionary has no dinosaur names, so the detector was blind to it) and `pachycephalosaur` — which was **my own repair, itself truncated**. `edmont` became `edmontosaurus`; `pachyr` was dropped instead, because its only honest expansion runs to eighteen characters, and a single word that long stretches the length filter for no benefit. There may be more; the detector can only catch fragments that are prefixes of words a 1934 dictionary happens to contain.
 
+- **225 words came from a machine-assisted growth round**, not from the original hand-curated list. Each was proposed by a model briefed on the pool's voice, passed the eight harness rules, survived two of three independent judges told to refute by default, and was reviewed by a human before being applied. The tooling is in the repo: `scripts/grow.mjs` proposes, `scripts/apply-proposals.mjs` applies, and `proposals/` (gitignored) holds the unreviewed output. A per-pool critic also reported what the round missed — mostly that it read "vivid" as "intense" and skewed long — which is the brief for round two.
 - **159 words appear in two or more pools.** Codes deduplicate them so every word is equally likely; handles keep them, but never repeat a word inside one name.
 
 - **9 words are two characters** — `gm`, `im`, `fm`, `cm`, `fr`, `gg`, `pi`, `ox`, `ok`. Some are deliberate (chess titles, an ox), some are probably noise, and I've left them rather than guess which is which.

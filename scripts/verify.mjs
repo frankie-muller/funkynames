@@ -76,9 +76,9 @@ const h = handleEntropy();
 const c3 = codeEntropy(3);
 const c4 = codeEntropy(4);
 const floors = [
-  ['handle', h, 28.0],
-  ['code x3', c3, 33.0],
-  ['code x4', c4, 44.0],
+  ['handle', h, 29.0],
+  ['code x3', c3, 33.5],
+  ['code x4', c4, 45.0],
 ];
 for (const [label, rep, floor] of floors) {
   if (rep.bits < floor) {

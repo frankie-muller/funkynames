@@ -11,3 +11,7 @@ site/
 npm-debug.log*
 .vscode/
 .idea/
+
+# `npm run grow` output — model proposals awaiting human review.
+# Unreviewed by definition; curate first, commit the pool file.
+proposals/

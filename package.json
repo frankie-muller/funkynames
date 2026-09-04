@@ -44,6 +44,7 @@
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:demo": "node scripts/build-demo.mjs",
     "typecheck:demo": "tsc -p demo/tsconfig.json",
+    "grow": "node scripts/grow.mjs",
     "verify": "node scripts/verify.mjs",
     "test": "npm run typecheck && npm run verify",
     "typecheck": "tsc --noEmit",
