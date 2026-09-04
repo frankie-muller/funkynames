@@ -368,11 +368,14 @@ for (const p of proposals) {
 
   // The truncation trap: a proposal that is a PREFIX of an existing word, or
   // that an existing word is a prefix of, is almost always a chopped variant.
+  // Prefix-of-existing is a WARNING, not a rejection. Round one's four catches
+  // were real truncations; round two's were kelp, basil, chalk, grit — words
+  // the brief asked for. The distinction needs a dictionary or a reader, so
+  // the proposal carries the flag and the human decides.
   const prefixOf = [...everyWord].find((w) => w !== word && w.startsWith(word) && word.length >= 4);
-  if (prefixOf) { reject(`prefix of existing '${prefixOf}' — likely a truncation`); continue; }
 
   seenThisRun.add(word);
-  accepted.push({ word, why });
+  accepted.push({ word, why, ...(prefixOf ? { warn: `prefix of existing '${prefixOf}' — confirm it is a word, not a truncation` } : {}) });
 }
 
 // ── Write ────────────────────────────────────────────────────────────────────

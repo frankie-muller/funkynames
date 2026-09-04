@@ -11,7 +11,7 @@
  * differently. See `mergePools` in ./pools.ts and the entropy notes.
  */
 
-/** Adjectives with a bit of attitude — the descriptive slot. 774 words. */
+/** Adjectives with a bit of attitude — the descriptive slot. 860 words. */
 export const ninjactives: readonly string[] = [
   'able', 'absent', 'actual', 'acute', 'added', 'alert', 'alive', 'alone',
   'amazed', 'angry', 'annual', 'anxious', 'arctic', 'armed', 'ashamed', 'asleep',
@@ -109,10 +109,21 @@ export const ninjactives: readonly string[] = [
   'taiko', 'tribal', 'chant', 'drone', 'world', 'newage', 'remix', 'cover',
   'mashup', 'edit', 'ferocious', 'venomous', 'clockwork', 'southpaw', 'bareknuckle', 'roundhouse',
   'yokozuna', 'luchador', 'grandmaster', 'desperado', 'psychobilly', 'industrial', 'relentless', 'nocturnal',
-  'haymaker', 'armageddon', 'lightning', 'flamenco', 'chiptune', 'hairtrigger',
+  'haymaker', 'armageddon', 'lightning', 'flamenco', 'chiptune', 'hairtrigger', 'unhinged', 'ironclad',
+  'orthodox', 'kyokushin', 'kunoichi', 'woodpusher', 'hardcore', 'honkytonk', 'tepid', 'tardy',
+  'unpaid', 'overdue', 'sundry', 'peckish', 'alleged', 'acting', 'former', 'lapsed',
+  'expired', 'amateur', 'medium', 'hapless', 'benched', 'oblong', 'portly', 'askew',
+  'midweek', 'pinned', 'hanging', 'passed', 'busted', 'castled', 'cramped', 'drawish',
+  'flagged', 'unclear', 'dubious', 'mated', 'winded', 'dazed', 'coiled', 'cocked',
+  'gassed', 'rattled', 'buckled', 'mounted', 'tapped', 'tucked', 'hunched', 'bootleg',
+  'offkey', 'muffled', 'sampled', 'tinny', 'detuned', 'offbeat', 'hushed', 'canned',
+  'mimed', 'lukewarm', 'adequate', 'municipal', 'perishable', 'optional', 'civilian', 'backward',
+  'skewered', 'smothered', 'overloaded', 'undefended', 'uncastled', 'outboxed', 'clinched', 'flatfooted',
+  'telegraphed', 'unplugged', 'syncopated', 'downtuned', 'falsetto', 'belated', 'ajar', 'shelled',
+  'kayoed', 'busked', 'pizzicato', 'mono',
 ];
 
-/** Verb-flavoured and motion words. 395 words. */
+/** Verb-flavoured and motion words. 450 words. */
 export const verbtrics: readonly string[] = [
   'buzz', 'click', 'code', 'crash', 'drop', 'flip', 'flow', 'hack',
   'jam', 'link', 'load', 'mint', 'mix', 'move', 'ping', 'post',
@@ -163,10 +174,17 @@ export const verbtrics: readonly string[] = [
   'faff', 'dyne', 'lux', 'mach', 'kip', 'dozy', 'poky', 'spry',
   'daub', 'riff', 'mosh', 'zing', 'zizz', 'skedaddle', 'ricochet', 'lollygag',
   'smidgeon', 'squiggly', 'skittery', 'frabjous', 'kerfuffle', 'muon', 'gallivant', 'somersault',
-  'bamboozle', 'metronome', 'flutterby',
+  'bamboozle', 'metronome', 'flutterby', 'whiz', 'flit', 'hoik', 'romp', 'lerp',
+  'pacy', 'bellyflop', 'corkscrew', 'angstrom', 'squelchy', 'pizzazzy', 'topsyturvy', 'commit',
+  'compile', 'parse', 'decode', 'toggle', 'hotfix', 'femto', 'quetta', 'omicron',
+  'voxel', 'qubit', 'vertex', 'stencil', 'scrawl', 'stipple', 'splotch', 'mouthy',
+  'lippy', 'huffy', 'snooty', 'hiccupy', 'belchy', 'gassy', 'tooty', 'stinky',
+  'overclock', 'doomscroll', 'keysmash', 'sideload', 'bitcrush', 'nanoscale', 'exascale', 'megapixel',
+  'hypercube', 'eigenvalue', 'scribble', 'crosshatch', 'splotchy', 'spraypaint', 'swaggery', 'slobbery',
+  'inkblot', 'smartypants',
 ];
 
-/** Colours and cute-adjacent descriptors. 372 words. */
+/** Colours and cute-adjacent descriptors. 433 words. */
 export const kawaiiolors: readonly string[] = [
   'aqua', 'beige', 'black', 'blue', 'blush', 'brown', 'coffee', 'crimson',
   'cyan', 'emerald', 'fuchsia', 'gray', 'green', 'jade', 'lime', 'magenta',
@@ -214,10 +232,18 @@ export const kawaiiolors: readonly string[] = [
   'wheel', 'yolk', 'oat', 'tuft', 'lace', 'boop', 'weft', 'kiln',
   'rasp', 'nib', 'niji', 'yuzu', 'sumi', 'kirakira', 'mochimochi', 'konpeito',
   'crucible', 'whetstone', 'lodestone', 'sprocket', 'fawn', 'lava', 'rime', 'chartreuse',
-  'gunmetal', 'malachite', 'corduroy', 'gossamer',
+  'gunmetal', 'malachite', 'corduroy', 'gossamer', 'puce', 'gilt', 'talc', 'awl',
+  'vise', 'lye', 'soot', 'beni', 'puni', 'mofu', 'goma', 'kakigori',
+  'mofumofu', 'mauve', 'seafoam', 'downy', 'satiny', 'gauzy', 'fleecy', 'pinkish',
+  'bluish', 'mewl', 'trill', 'snuffle', 'wheek', 'hiss', 'temper', 'ember',
+  'scorch', 'anneal', 'smolder', 'singe', 'molten', 'patina', 'kaze', 'kokoro',
+  'hotaru', 'akari', 'babypink', 'bubblegum', 'powderblue', 'spearmint', 'feathery', 'cushiony',
+  'shimmery', 'velvetish', 'hushabye', 'clangour', 'whitehot', 'incandesce', 'komorebi', 'tomodachi',
+  'kirameki', 'hoshizora', 'hidamari', 'baby', 'cobwebby', 'susurrus', 'wingbeat', 'duckegg',
+  'peep',
 ];
 
-/** Actions and states with meme energy. 518 words. */
+/** Actions and states with meme energy. 591 words. */
 export const memactions: readonly string[] = [
   'fusion', 'ignite', 'bond', 'crack', 'melt', 'boil', 'vapor', 'flare',
   'glow', 'burst', 'shock', 'phase', 'solid', 'liquid', 'plasma', 'freeze',
@@ -283,10 +309,19 @@ export const memactions: readonly string[] = [
   'swoopr', 'mecha', 'walker', 'winged', 'floater', 'telepod', 'warpjet', 'timecar',
   'drifter', 'tank', 'cart', 'shipper', 'flycar', 'wormax', 'airbus', 'skybus',
   'finalboss', 'monorail', 'streamliner', 'hydrofoil', 'cosmodrome', 'scramjet', 'antigrav', 'cyclotron',
-  'positronic', 'brainrot', 'speedrun', 'ragequit', 'sidequest', 'cheatcode',
+  'positronic', 'brainrot', 'speedrun', 'ragequit', 'sidequest', 'cheatcode', 'bullethell', 'autogyro',
+  'chrononaut', 'astrogator', 'joystick', 'clanker', 'unc', 'tuff', 'pookie', 'blud',
+  'mog', 'yap', 'bussin', 'jetpod', 'zipjet', 'glidr', 'whizzo', 'atomo',
+  'orbix', 'rayjet', 'zapcar', 'zorbo', 'lunapod', 'gyropod', 'cosmox', 'blastr',
+  'gank', 'tryhard', 'mald', 'sadge', 'noscope', 'juke', 'wombo', 'gitgud',
+  'yoink', 'ggwp', 'scrub', 'godlike', 'griddy', 'ngmi', 'rugpull', 'copium',
+  'topkek', 'doot', 'nyoom', 'brrr', 'blursed', 'smort', 'fren', 'sixseven',
+  'aurafarm', 'crashout', 'tralalero', 'zoomerang', 'jetbubble', 'orbitron', 'vroomatic', 'skyzipper',
+  'wenlambo', 'wompwomp', 'gigabased', 'demure', 'chopped', 'seethe', 'looksmaxx', 'chillguy',
+  'skillissue', 'touchgrass', 'wombocombo', 'paperhands', 'ragebait', 'ezclap', 'atomobile',
 ];
 
-/** Places, terrain and habitats. 340 words. */
+/** Places, terrain and habitats. 449 words. */
 export const biome: readonly string[] = [
   'alpaca', 'ant', 'antlion', 'asp', 'baboon', 'badger', 'bass', 'bat',
   'bear', 'beaver', 'bee', 'beetle', 'bird', 'bison', 'boa', 'boar',
@@ -330,10 +365,24 @@ export const biome: readonly string[] = [
   'fennec', 'narwhal', 'okapi', 'dugong', 'piranha', 'lamprey', 'cicada', 'mantis',
   'earwig', 'weevil', 'katydid', 'axolotl', 'caiman', 'tuatara', 'mammoth', 'quince',
   'pomelo', 'loquat', 'durian', 'jicama', 'chayote', 'nopal', 'porcini', 'foxglove',
-  'quoll', 'jerboa', 'potoo', 'motmot',
+  'quoll', 'jerboa', 'potoo', 'motmot', 'wolverine', 'shoebill', 'lyrebird', 'nautilus',
+  'nudibranch', 'tardigrade', 'vinegaroon', 'tiktaalik', 'bonobo', 'kakapo', 'gharial', 'aurochs',
+  'kumquat', 'squonk', 'hodag', 'willow', 'birch', 'aspen', 'sequoia', 'baobab',
+  'ginkgo', 'orchid', 'thistle', 'bracken', 'lichen', 'saguaro', 'morel', 'amanita',
+  'minmi', 'anzu', 'tawa', 'dilong', 'yinlong', 'tarchia', 'jobaria', 'rugops',
+  'kakuru', 'spinops', 'cumin', 'pecan', 'lentil', 'barley', 'thyme', 'fava',
+  'nutmeg', 'saffron', 'paprika', 'cashew', 'quinoa', 'sesame', 'millet', 'corgi',
+  'husky', 'tabby', 'foal', 'joey', 'tadpole', 'piglet', 'gosling', 'cygnet',
+  'owlet', 'beagle', 'calico', 'shiba', 'nixie', 'lutin', 'tomte', 'domovoi',
+  'duende', 'saci', 'diwata', 'turehu', 'sycamore', 'snapdragon', 'toadstool', 'jacaranda',
+  'bladderwrack', 'diplodocus', 'gallimimus', 'oviraptor', 'maiasaura', 'coriander', 'cardamom', 'tarragon',
+  'pistachio', 'macadamia', 'buckwheat', 'chickpea', 'fenugreek', 'peppercorn', 'dachshund', 'chihuahua',
+  'pomeranian', 'dalmatian', 'schnauzer', 'duckling', 'hatchling', 'polliwog', 'cockatiel', 'leprechaun',
+  'korrigan', 'farfadet', 'tofukozo', 'chaneque', 'menehune', 'balaur', 'maidenhair', 'kelp',
+  'basil',
 ];
 
-/** Creatures, materials and things. 311 words. */
+/** Creatures, materials and things. 420 words. */
 export const monsterials: readonly string[] = [
   'stone', 'clay', 'flint', 'marble', 'basalt', 'granite', 'slate', 'obsidian',
   'quartz', 'onyx', 'opal', 'agate', 'pearl', 'ivory', 'glass', 'bronze',
@@ -373,7 +422,21 @@ export const monsterials: readonly string[] = [
   'nullite', 'orochi', 'raiju', 'kodama', 'yurei', 'cadejo', 'amaru', 'xtabay',
   'vetala', 'rangda', 'ammit', 'rusalka', 'strigoi', 'tupilaq', 'bunyip', 'verdigris',
   'alkahest', 'butterscotch', 'marshmallow', 'gandharva', 'doppelganger', 'wolpertinger', 'amphisbaena', 'galena',
-  'peridot', 'gallium', 'lechuza', 'garuda', 'makara', 'marid', 'anansi',
+  'peridot', 'gallium', 'lechuza', 'garuda', 'makara', 'marid', 'anansi', 'molybdenum',
+  'orichalcum', 'adamantine', 'quicksilver', 'fulgurite', 'strangelet', 'stygianite', 'manananggal', 'penanggalan',
+  'pishacha', 'tokoloshe', 'impundulu', 'asanbosam', 'xiuhcoatl', 'pukwudgie', 'cockatrice', 'wolfram',
+  'realgar', 'umibozu', 'hannya', 'boitata', 'aswang', 'kumiho', 'voltrix', 'kessium',
+  'oxyral', 'cindral', 'thalyra', 'lumyra', 'draxon', 'nyxite', 'glacite', 'ferrax',
+  'shale', 'loam', 'peat', 'dross', 'zipacna', 'kisin', 'ixtab', 'xelhua',
+  'cegua', 'cipitio', 'qilin', 'pixiu', 'taotie', 'nian', 'yaoguai', 'huli',
+  'xiezhi', 'qiongqi', 'krasue', 'krahang', 'kongkoi', 'belu', 'taniwha', 'tipua',
+  'maero', 'nifoloa', 'tupapau', 'douen', 'ciguapa', 'lagahoo', 'duppy', 'jumbie',
+  'abiku', 'kishi', 'eloko', 'tenebrix', 'vortalix', 'abyssium', 'thalassium', 'solstyra',
+  'meridyra', 'tessaron', 'cryostal', 'nadirite', 'lampblack', 'itzpapalotl', 'sisimito', 'huaychivo',
+  'siguanaba', 'hulijing', 'fenghuang', 'xiangliu', 'baigujing', 'xingtian', 'nianshou', 'phayanak',
+  'kinnaree', 'ponaturi', 'patupaiarehe', 'kurangaituku', 'marakihau', 'soucouyant', 'lajablesse', 'galipote',
+  'ninkinanka', 'mamiwata', 'bultungin', 'taurion', 'voidsteel', 'pitchblende', 'quicklime', 'ironwood',
+  'helyx', 'chalk', 'grit', 'marl',
 ];
 
 /** Every pool, in canonical order. */

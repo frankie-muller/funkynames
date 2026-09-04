@@ -46,7 +46,8 @@
     "typecheck:demo": "tsc -p demo/tsconfig.json",
     "grow": "node scripts/grow.mjs",
     "verify": "node scripts/verify.mjs",
-    "test": "npm run typecheck && npm run verify",
+    "sync:readme": "node scripts/sync-readme.mjs",
+    "test": "npm run typecheck && npm run verify && npm run build && npm run sync:readme -- --check",
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build",
     "prepublishOnly": "npm test"

@@ -61,8 +61,13 @@ for (const [pool, words] of Object.entries(incoming)) {
       // Cross-pool duplicates are allowed (159 already exist) but worth seeing.
       skipped.push(`${pool}/${w}: note — already in another pool, added anyway`);
     }
+    // A proposal that is a prefix of an existing word MAY be a chopped form
+    // (kiri/kirin) or a real word that happens to nest (kelp/kelpie, basil/
+    // basilisk). Without a dictionary the two are indistinguishable, so this
+    // is a note for the reviewer, not a refusal — the lexical judge upstream
+    // is the one that can actually tell them apart.
     const parent = [...everyWord].find((e) => e !== w && e.startsWith(w) && w.length >= 4);
-    if (parent) { skipped.push(`${pool}/${w}: prefix of existing '${parent}' — refused as a likely truncation`); continue; }
+    if (parent) { skipped.push(`${pool}/${w}: note — prefix of existing '${parent}'; confirm it is a word, not a truncation`); }
     seen.add(w);
     out.push(w);
   }
@@ -81,7 +86,7 @@ for (const [pool, words] of added) {
   console.log(`  ${pool.padEnd(14)} ${String(before).padStart(4)} → ${String(before + words.length).padStart(4)}  (+${words.length})`);
 }
 console.log(`  ${'TOTAL'.padEnd(14)} +${total}`);
-if (notes.length) { console.log(`\n  ${notes.length} cross-pool duplicates (allowed):`); for (const n of notes.slice(0, 12)) console.log(`    ${n}`); if (notes.length > 12) console.log(`    … ${notes.length - 12} more`); }
+if (notes.length) { console.log(`\n  ${notes.length} note(s) — allowed, but read them:`); for (const n of notes.slice(0, 12)) console.log(`    ${n}`); if (notes.length > 12) console.log(`    … ${notes.length - 12} more`); }
 if (refused.length) { console.log(`\n  REFUSED ${refused.length}:`); for (const r of refused) console.log(`    ${r}`); }
 
 if (!write) { console.log('\n  Nothing written. Re-run with --write to apply, then `npm test`.\n'); process.exit(0); }
