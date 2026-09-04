@@ -106,7 +106,7 @@ export function withinLength(words: readonly string[], options: LengthOptions = 
   const kept = words.filter((w) => w.length >= min && w.length <= max);
   if (kept.length === 0) {
     throw new RangeError(
-      `funkynames: no words between ${min} and ${max} characters — the pools run 2 to 13`,
+      `funkynames: no words between ${min} and ${max} characters — the pools run 2 to 12`,
     );
   }
   return kept;

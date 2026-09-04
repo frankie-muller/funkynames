@@ -11,18 +11,18 @@
 <style>
   :root {
     --paper:#FBF9F6; --surface:#FFFFFF; --surface-2:#F3F0EB;
-    --ink:#171514; --ink-2:#514C48; --ink-3:#867E78;
+    --ink:#171514; --ink-2:#514C48; --ink-3:#6F6863;
     --rule:#E4DFD7; --rule-soft:#EFEBE4;
     --accent:#C2185B; --accent-2:#9C144A; --accent-bg:#FBE7EF;
     --good:#1B7A50; --good-bg:#E3F2EA;
-    --warn:#9A6510; --warn-bg:#FBEEDA;
+    --warn:#7F520C; --warn-bg:#FBEEDA;
     --bad:#B3261E;  --bad-bg:#FBE6E4;
     --mono-bg:#F2EFE9;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --paper:#151312; --surface:#1C1918; --surface-2:#232020;
-      --ink:#EFEBE7; --ink-2:#B0A8A2; --ink-3:#7E7671;
+      --ink:#EFEBE7; --ink-2:#B0A8A2; --ink-3:#9A928C;
       --rule:#302B29; --rule-soft:#262221;
       --accent:#FF6FA5; --accent-2:#FF9CC1; --accent-bg:#2E1520;
       --good:#5FC894; --good-bg:#16281F;
@@ -68,15 +68,20 @@
                 background:var(--mono-bg); border-radius:4px; padding:7px 10px; }
   ul.names code { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--ink);
                   overflow-wrap:anywhere; }
-  .copy { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em;
+  ul.names .copy { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em;
           text-transform:uppercase; color:var(--ink-3); background:none; border:0;
           cursor:pointer; padding:2px 4px; flex-shrink:0; }
-  .copy:hover { color:var(--accent); }
+  ul.names .copy:hover { color:var(--accent); }
 
   button.go { font-family:inherit; font-size:14px; font-weight:600; cursor:pointer;
               background:var(--accent); color:#fff; border:1px solid var(--accent);
               border-radius:5px; padding:9px 16px; }
   button.go:hover { background:var(--accent-2); border-color:var(--accent-2); }
+  button.go:disabled { opacity:.5; cursor:default; }
+  button.ghost { font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; padding:9px 16px;
+                 border-radius:5px; background:transparent; color:var(--ink-2); border:1px solid var(--rule); }
+  button.ghost:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+  button.ghost:disabled { opacity:.5; cursor:default; }
   @media (prefers-color-scheme: dark) { button.go { color:#1A0D13; } }
   :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
@@ -92,7 +97,7 @@
   .ctl output { font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:500;
                 color:var(--accent); min-width:5.5ch; }
   input[type=range] { flex:1 1 130px; min-width:110px; accent-color:var(--accent); }
-  select { font-family:inherit; font-size:15px; color:var(--ink); background:var(--surface);
+  select { font-family:inherit; font-size:16px; color:var(--ink); background:var(--surface);
            border:1px solid var(--rule); border-radius:5px; padding:9px 11px; width:100%; }
 
   #pool-toggles { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
@@ -100,13 +105,15 @@
             background:var(--surface); border:1px solid var(--rule); border-radius:99px;
             padding:5px 12px 5px 9px; cursor:pointer; }
   .toggle b { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-3); font-weight:400; }
-  .toggle.off { opacity:.42; }
+  .toggle.off { color:var(--ink-3); border-style:dashed; background:var(--surface-2); }
+  .toggle.off b { color:var(--ink-3); }
   .toggle input { accent-color:var(--accent); margin:0; }
 
   .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
              background:var(--rule); border:1px solid var(--rule); border-radius:6px;
              overflow:hidden; margin-bottom:12px; }
-  .readout > div { background:var(--surface); padding:13px 15px; }
+  .readout > div { background:var(--surface); padding:13px 15px; min-width:0; overflow-wrap:anywhere; }
+  .verdict b, .verdict i, .foot { min-width:0; overflow-wrap:anywhere; }
   .k { display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.11em;
        text-transform:uppercase; color:var(--ink-3); margin-bottom:4px; }
   .readout b { display:block; font-family:'Bricolage Grotesque',sans-serif; font-size:21px;
@@ -129,6 +136,55 @@
   .foot strong { color:var(--ink); }
   .empty { color:var(--ink-3); font-size:14px; margin:0; }
 
+  /* ── Picker ──────────────────────────────────────────────── */
+  .picks { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin:0 0 14px; }
+  .pick { display:flex; align-items:stretch; gap:4px; min-width:0;
+          background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+          transition:border-color .12s, background .12s, box-shadow .12s; }
+  .pick:hover { border-color:var(--accent); }
+  .pick .choose { flex:1 1 auto; min-width:0; text-align:left; font:inherit; background:none; border:0;
+                  cursor:pointer; padding:14px 6px 14px 16px; border-radius:6px 0 0 6px; color:inherit; }
+  .pick .choose:focus-visible, .pick .star:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
+  .pick code { font-family:'IBM Plex Mono',monospace; font-size:15.5px; color:var(--ink);
+               background:none; padding:0; overflow-wrap:anywhere; }
+  .pick.starred { border-color:var(--accent); background:var(--accent-bg); }
+  .pick.selected { border-color:var(--accent); background:var(--accent-bg);
+                   box-shadow:inset 0 0 0 1px var(--accent), 0 0 0 3px var(--accent-bg); }
+  .pick .star { font-size:18px; line-height:1; background:none; border:0; cursor:pointer;
+                color:var(--ink-3); padding:4px 12px 4px 8px; border-radius:0 6px 6px 0; flex-shrink:0; }
+  .pick .star:hover { color:var(--accent); background:var(--surface-2); }
+  .pick.starred .star { color:var(--accent); }
+  .pickbar { margin-bottom:18px; }
+  .kbd { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-3); flex-basis:100%; }
+  @media (hover:none) { .kbd { display:none; } }
+  .no-clipboard [data-copy] { display:none; }
+  .hint { color:var(--ink-3); font-size:14px; margin:0; max-width:60ch; }
+  .chosen-card { background:var(--surface); border:2px solid var(--accent); border-radius:8px;
+                 padding:18px 20px; }
+  .chosen-name { display:flex; flex-wrap:wrap; align-items:flex-start; gap:2px 0; margin:6px 0 14px; }
+  .chosen-name .w { display:inline-flex; flex-direction:column; align-items:flex-start; min-width:0; }
+  .chosen-name .row { display:inline-flex; align-items:baseline; }
+  .chosen-name .w code { font-family:'Bricolage Grotesque',system-ui,sans-serif; font-weight:800;
+                          font-size:clamp(26px,4.6vw,44px); line-height:1; letter-spacing:-.02em;
+                          background:none; padding:0; color:var(--ink); }
+  .chosen-name .w small { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em;
+                           text-transform:uppercase; color:var(--accent); margin-top:5px; }
+  .chosen-name .sep { font-family:'Bricolage Grotesque',sans-serif; font-weight:800;
+                      font-size:clamp(26px,4.6vw,44px); line-height:1; color:var(--ink-3); margin:0 4px; }
+  .chosen-foot { display:flex; flex-wrap:wrap; align-items:center; gap:14px; min-width:0; }
+  .big-copy { flex:0 1 auto; min-width:0; max-width:100%; white-space:normal; }
+  .card.codes { max-width:560px; }
+  .card.codes .ctl { margin:0; }
+  .card.codes .ctl .go { margin-left:auto; }
+
+  @media (max-width:420px) {
+    .ctl input[type=range] { flex-basis:100%; order:2; }
+    .ctl output { margin-left:auto; }
+  }
+  .sr-only { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+             clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  .lengthbar .scope { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-3); flex-basis:100%; }
+
   footer { margin-top:56px; padding-top:24px; border-top:1px solid var(--rule);
            font-size:13.5px; color:var(--ink-3); }
   footer a { color:var(--accent); }
@@ -138,6 +194,8 @@
 </head>
 <body>
 <div class="shell">
+  <p id="sr-status" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript><p class="empty" style="padding:16px;border:1px solid var(--rule);border-radius:6px">This demo runs the library in your browser and needs JavaScript. The source and the README are on <a href="https://github.com/frankie-muller/funkynames">GitHub</a>.</p></noscript>
 
   <header class="top">
     <p class="eyebrow">like petnames, but funkier</p>
@@ -151,9 +209,21 @@
     </p>
   </header>
 
-  <section>
-    <h2>Roll some</h2>
-    <p class="lede">Generated in your browser by the real library. Nothing is sent anywhere.</p>
+  <section id="pick-panel">
+    <h2>Pick a handle</h2>
+    <p class="lede">
+      A handle is three words in a fixed order — a <em>descriptor</em>, then a <em>colour or
+      action</em>, then a <em>place or thing</em> — drawn from six pools that were curated for how
+      they sound together. The grammar is what makes it read like a name; no word ever repeats
+      inside one handle. Seven are generated below, in your browser, by the same library the
+      package ships. No name you generate leaves this page — the only thing it fetches is the typeface.
+    </p>
+    <p class="lede">
+      Read them aloud. <strong>Star the ones that stick, then reroll the rest</strong> — starred
+      handles stay put, everything else is replaced. After two or three rerolls, the one you can
+      still say without looking is the memorable one. Click it to choose it: you'll see which pool
+      each word came from, and how many handles were possible at this length range.
+    </p>
 
     <div class="ctl lengthbar">
       <label for="min-len">Word length</label>
@@ -161,23 +231,37 @@
       <span class="to">to</span>
       <select id="max-len" aria-label="Maximum word length"></select>
       <span class="pool-note" id="length-note"></span>
+      <span class="scope">Applies to every panel on the page. Changing it deals a fresh seven; starred handles that still fit are kept.</span>
     </div>
-    <div class="cols">
-      <div class="card">
-        <h3>Handles</h3>
-        <p class="sub">Three structured slots — descriptor, colour or action, place or thing. Reads like a name. No word repeats.</p>
-        <ul class="names" id="handle-list"></ul>
-        <button class="go" id="roll-handles" type="button">Roll again</button>
-      </div>
-      <div class="card">
-        <h3>Codes</h3>
-        <p class="sub">Flat draws from every pool at once. Any word, any position — worth more bits per word, reads less like a name.</p>
-        <ul class="names" id="code-list"></ul>
-        <div class="ctl">
-          <label for="code-words">Words</label>
-          <input type="range" id="code-words" min="2" max="8" value="4">
-          <output id="code-words-out">4</output>
-        </div>
+
+    <div class="picks" id="picks" role="group" aria-label="Handle options"></div>
+
+    <div class="ctl pickbar">
+      <button class="go" id="reroll" type="button">Reroll all seven</button>
+      <button class="ghost" id="clear-stars" type="button" disabled>Clear stars</button>
+      <span class="pool-note" id="pick-note"></span>
+      <span class="kbd">Keyboard: Tab between options, Enter on a name to choose it, Enter on ☆ or S to star</span>
+    </div>
+
+    <div id="chosen"></div>
+  </section>
+
+  <section>
+    <h2>Roll some codes</h2>
+    <p class="lede">
+      Codes are the other shape. Where a handle keeps a grammar, a code draws every word from all
+      six pools merged, in any order, with repeats allowed — so it reads less like a name and more
+      like a passphrase, and each word is worth more bits. Use handles for things people will
+      say and remember; use codes for invite links, room codes and anything a stranger might try
+      to guess. The slider sets how many words; the "Take it apart" panel below shows what each
+      extra word buys you.
+    </p>
+    <div class="card codes">
+      <ul class="names" id="code-list"></ul>
+      <div class="ctl">
+        <label for="code-words">Words per code</label>
+        <input type="range" id="code-words" min="2" max="8" value="4">
+        <output id="code-words-out">4</output>
         <button class="go" id="roll-codes" type="button">Roll again</button>
       </div>
     </div>
@@ -186,15 +270,16 @@
   <section>
     <h2>Take it apart</h2>
     <p class="lede">
-      Turn pools off, change the length, then set the attack you're worried about. The second
-      slider is the one people forget: an attacker doesn't want <em>your</em> name, they want
+      Turn pools off, pick how many words to analyse, then set the attack you're worried about.
+      (Word length is set once, at the top of the page, and applies here too.) The last slider is
+      the one people forget: an attacker doesn't want <em>your</em> name, they want
       <em>any live one</em> — so a big keyspace gets diluted by a big population.
     </p>
 
     <div id="pool-toggles"></div>
 
     <div class="ctl">
-      <label for="lab-words">Words</label>
+      <label for="lab-words">Words to analyse</label>
       <input type="range" id="lab-words" min="1" max="10" value="4">
       <output id="lab-words-out">4</output>
     </div>
@@ -209,14 +294,18 @@
       <output id="targets-out"></output>
     </div>
 
-    <div id="lab-readout" aria-live="polite"></div>
+    <div id="lab-readout"></div>
+    <p id="lab-status" class="sr-only" role="status"></p>
   </section>
 
   <section>
     <h2>Is this safe for…</h2>
-    <p class="lede">Same settings as above, measured against what each use actually demands.</p>
+    <p class="lede">
+      Judges the <em>Take it apart</em> settings — its pools, its word count, its word length — against
+      what each use actually demands. The codes above are just examples; this panel measures the shape, not a specific code.
+    </p>
     <select id="use-case" aria-label="Use case"></select>
-    <div id="safety-readout" aria-live="polite" style="margin-top:16px"></div>
+    <div id="safety-readout" style="margin-top:16px"></div>
   </section>
 
   <footer>
@@ -226,9 +315,10 @@
       built by <a href="https://www.singularcontinuum.com">Frank Müller</a>
     </p>
     <p>
-      Word pools are opinionated and were curated by hand for how they sound together, not for
-      coverage. 159 words appear in more than one pool; codes deduplicate them so every word is
-      equally likely, handles keep them but never repeat a word within one name.
+      The word pools are opinionated on purpose — picked for how they sound next to each other,
+      then grown with a lot of help and a lot of pruning. If a name makes you laugh, that&#8217;s
+      it working. The full story, gaps included, is in the
+      <a href="https://github.com/frankie-muller/funkynames#known-gaps">README</a>.
     </p>
   </footer>
 

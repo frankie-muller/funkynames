@@ -349,7 +349,7 @@ export const biome: readonly string[] = [
   'wren', 'yak', 'zebra', 'rex', 'trex', 'raptor', 'triceratops', 'stegosaurus',
   'ankylosaurus', 'spinosaurus', 'brontosaurus', 'allosaurus', 'iguanodon', 'compy', 'paras', 'troodon',
   'velociraptor', 'titan', 'dino', 'quetzal', 'plesiosaur', 'mosasaurus', 'carnotaurus', 'gorgosaurus',
-  'ceratosaurus', 'edmontosaurus', 'hadrosaurus', 'apple', 'apricot', 'avocado', 'banana', 'berry',
+  'ceratosaurus', 'hadrosaurus', 'apple', 'apricot', 'avocado', 'banana', 'berry',
   'bilberry', 'blackberry', 'cantaloupe', 'cherry', 'citron', 'coconut', 'currant', 'date',
   'fig', 'guava', 'grape', 'lemon', 'lime', 'lychee', 'mango', 'melon',
   'orange', 'papaya', 'peach', 'pear', 'prune', 'raisin', 'tamarind', 'tomato',
