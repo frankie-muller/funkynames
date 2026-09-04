@@ -290,7 +290,7 @@ const USE_CASES: UseCase[] = [
   { id: 'reset', label: 'Password reset token', bits: 60, rateLimited: true,
     plainWhy: 'Guess this one and you own the account, so even though it should only live for minutes it needs about a billion billion possibilities (60 bits — a 10-character random password of letters and digits).' },
   { id: 'apikey', label: 'API key or bearer token', bits: 128, rateLimited: false,
-    plainWhy: 'It\'s a permanent password that machines get to try as fast as they like, so it needs 128 bits — a number 39 digits long, as many possibilities as a 22-character random password. Words can\'t get there at a readable length: ten words from every pool on this page is about 116 bits, so this panel will never say yes here. Honestly, that\'s a job for random bytes, not words; words are for saying out loud.' },
+    plainWhy: 'It\'s a permanent password that machines get to try as fast as they like, so it needs 128 bits — a number 39 digits long, as many possibilities as a 22-character random password. With every pool on, that takes twelve words — the top of the slider — and nobody is reading a twelve-word key aloud. Honestly, that\'s a job for random bytes, not words; words are for saying out loud.' },
 ];
 
 const useCaseSelect = $<HTMLSelectElement>('use-case');
@@ -309,6 +309,11 @@ function about(n: number): string {
 function dur(seconds: number): string {
   if (seconds < 1) { return 'less than a second'; }
   if (seconds < 60) { return `about ${plural(Math.round(seconds), 'second')}`; }
+  const years = seconds / 31_557_600;
+  // Past a few million years the exact figure is noise; past the age of the
+  // universe it is a punchline. Say so instead of printing 21 digits.
+  if (years >= 1.4e10) { return 'longer than the universe has existed'; }
+  if (years >= 1e6) { return `about ${compact.format(years)} years`; }
   return humanizeSeconds(seconds);
 }
 
