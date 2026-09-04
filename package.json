@@ -1,0 +1,63 @@
+{
+  "name": "funkynames",
+  "version": "0.1.0",
+  "description": "Like petnames, but funkier — three-word handles and codes from six curated pools, with the entropy arithmetic included.",
+  "keywords": [
+    "names",
+    "petnames",
+    "handles",
+    "usernames",
+    "identifiers",
+    "random",
+    "entropy",
+    "wordlist",
+    "csprng",
+    "offline"
+  ],
+  "license": "MIT",
+  "author": "Frank Müller (https://www.singularcontinuum.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frankie-muller/funkynames.git"
+  },
+  "bugs": {
+    "url": "https://github.com/frankie-muller/funkynames/issues"
+  },
+  "homepage": "https://github.com/frankie-muller/funkynames#readme",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build:demo": "node scripts/build-demo.mjs",
+    "typecheck:demo": "tsc -p demo/tsconfig.json",
+    "verify": "node scripts/verify.mjs",
+    "test": "npm run typecheck && npm run verify",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

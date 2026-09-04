@@ -1,0 +1,61 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: typecheck + word harness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `prepare` runs here, so this also builds dist/.
+      - run: npm ci
+
+      # Word hygiene, entropy floors, determinism, stuck-RNG canary.
+      # Data rots quietly; this is what stops it rotting unnoticed.
+      - run: npm test
+
+      - run: npm run typecheck:demo
+
+  package:
+    name: installs as a consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # Pack, install into a scratch project, import it the way a stranger
+      # would. Catches the packaging faults a test suite structurally cannot
+      # see: a missing entry in `files`, a wrong `exports` path, a relative
+      # import emitted without its .js extension.
+      - name: Pack and import from a scratch project
+        run: |
+          TARBALL="$(npm pack --silent)"
+          mkdir -p /tmp/consumer && cd /tmp/consumer
+          echo '{"name":"c","private":true,"type":"module","version":"1.0.0"}' > package.json
+          npm install "$GITHUB_WORKSPACE/$TARBALL" --no-audit --no-fund
+          cat > run.mjs <<'EOF2'
+          import { generateHandle, generateCode, codeEntropy, parseName } from 'funkynames';
+          const h = generateHandle();
+          if (h.split('-').length !== 3) { throw new Error(`bad handle: ${h}`); }
+          if (new Set(h.split('-')).size !== 3) { throw new Error(`handle repeats a word: ${h}`); }
+          if (generateCode().split('-').length !== 4) { throw new Error('code should default to 4 words'); }
+          if (codeEntropy(4).bits < 44) { throw new Error('entropy floor breached'); }
+          if (parseName(h) === null) { throw new Error('a generated handle must parse'); }
+          console.log(`consumer import OK - ${h}`);
+          EOF2
+          node run.mjs

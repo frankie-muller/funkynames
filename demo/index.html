@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>funkynames — three-word names, and what they're actually worth</title>
+<meta name="description" content="Generate three-word handles and codes from six curated pools, then take the entropy apart: keyspace, collision point, and how long a real guessing attack would take.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper:#FBF9F6; --surface:#FFFFFF; --surface-2:#F3F0EB;
+    --ink:#171514; --ink-2:#514C48; --ink-3:#867E78;
+    --rule:#E4DFD7; --rule-soft:#EFEBE4;
+    --accent:#C2185B; --accent-2:#9C144A; --accent-bg:#FBE7EF;
+    --good:#1B7A50; --good-bg:#E3F2EA;
+    --warn:#9A6510; --warn-bg:#FBEEDA;
+    --bad:#B3261E;  --bad-bg:#FBE6E4;
+    --mono-bg:#F2EFE9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#151312; --surface:#1C1918; --surface-2:#232020;
+      --ink:#EFEBE7; --ink-2:#B0A8A2; --ink-3:#7E7671;
+      --rule:#302B29; --rule-soft:#262221;
+      --accent:#FF6FA5; --accent-2:#FF9CC1; --accent-bg:#2E1520;
+      --good:#5FC894; --good-bg:#16281F;
+      --warn:#E0A94C; --warn-bg:#2B2113;
+      --bad:#F08078;  --bad-bg:#2E1917;
+      --mono-bg:#221F1E;
+    }
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell { max-width:1020px; margin:0 auto; padding:0 24px 80px; }
+
+  header.top { padding:52px 0 30px; border-bottom:1px solid var(--rule); }
+  .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.15em;
+             text-transform:uppercase; color:var(--accent); margin:0 0 14px; }
+  h1 { font-family:'Bricolage Grotesque',system-ui,sans-serif; font-weight:800;
+       font-size:clamp(40px,7vw,72px); line-height:.98; letter-spacing:-.03em; margin:0 0 16px;
+       text-wrap:balance; }
+  .standfirst { font-size:18.5px; color:var(--ink-2); max-width:56ch; margin:0; }
+  .standfirst a { color:var(--accent); }
+
+  section { padding-top:46px; }
+  h2 { font-family:'Bricolage Grotesque',system-ui,sans-serif; font-weight:600;
+       font-size:clamp(24px,3.4vw,32px); line-height:1.12; letter-spacing:-.018em;
+       margin:0 0 8px; text-wrap:balance; }
+  .lede { color:var(--ink-2); max-width:64ch; margin:0 0 22px; }
+
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:720px) { .cols { grid-template-columns:1fr; } }
+
+  .card { background:var(--surface); border:1px solid var(--rule); border-radius:6px; padding:18px; }
+  .card h3 { font-family:'Bricolage Grotesque',system-ui,sans-serif; font-size:16px; font-weight:600;
+             margin:0 0 4px; }
+  .card .sub { font-size:13px; color:var(--ink-3); margin:0 0 14px; }
+
+  ul.names { list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:5px; }
+  ul.names li { display:flex; align-items:center; justify-content:space-between; gap:10px;
+                background:var(--mono-bg); border-radius:4px; padding:7px 10px; }
+  ul.names code { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--ink);
+                  overflow-wrap:anywhere; }
+  .copy { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em;
+          text-transform:uppercase; color:var(--ink-3); background:none; border:0;
+          cursor:pointer; padding:2px 4px; flex-shrink:0; }
+  .copy:hover { color:var(--accent); }
+
+  button.go { font-family:inherit; font-size:14px; font-weight:600; cursor:pointer;
+              background:var(--accent); color:#fff; border:1px solid var(--accent);
+              border-radius:5px; padding:9px 16px; }
+  button.go:hover { background:var(--accent-2); border-color:var(--accent-2); }
+  @media (prefers-color-scheme: dark) { button.go { color:#1A0D13; } }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  .ctl { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .ctl label { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.11em;
+               text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+  .lengthbar { background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+               padding:12px 14px; margin-bottom:18px; }
+  .lengthbar select { width:auto; min-width:7.5em; padding:6px 9px; font-size:14px; }
+  .lengthbar .to { color:var(--ink-3); font-size:13px; }
+  .pool-note { font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-3); }
+  .pool-note.warn { color:var(--warn); }
+  .ctl output { font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:500;
+                color:var(--accent); min-width:5.5ch; }
+  input[type=range] { flex:1 1 130px; min-width:110px; accent-color:var(--accent); }
+  select { font-family:inherit; font-size:15px; color:var(--ink); background:var(--surface);
+           border:1px solid var(--rule); border-radius:5px; padding:9px 11px; width:100%; }
+
+  #pool-toggles { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+  .toggle { display:inline-flex; align-items:center; gap:6px; font-size:13px;
+            background:var(--surface); border:1px solid var(--rule); border-radius:99px;
+            padding:5px 12px 5px 9px; cursor:pointer; }
+  .toggle b { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-3); font-weight:400; }
+  .toggle.off { opacity:.42; }
+  .toggle input { accent-color:var(--accent); margin:0; }
+
+  .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+             background:var(--rule); border:1px solid var(--rule); border-radius:6px;
+             overflow:hidden; margin-bottom:12px; }
+  .readout > div { background:var(--surface); padding:13px 15px; }
+  .k { display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.11em;
+       text-transform:uppercase; color:var(--ink-3); margin-bottom:4px; }
+  .readout b { display:block; font-family:'Bricolage Grotesque',sans-serif; font-size:21px;
+               font-weight:600; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .readout i { display:block; font-style:normal; font-size:12px; color:var(--ink-3); margin-top:3px; }
+
+  .verdict { border-radius:6px; padding:15px 17px; border:1px solid; }
+  .verdict b { display:block; font-family:'Bricolage Grotesque',sans-serif; font-size:24px;
+               font-weight:600; line-height:1.12; margin:2px 0 4px; }
+  .verdict i { display:block; font-style:normal; font-size:13px; }
+  .verdict.good { border-color:var(--good); background:var(--good-bg); }
+  .verdict.good b, .verdict.good .k { color:var(--good); }
+  .verdict.warn { border-color:var(--warn); background:var(--warn-bg); }
+  .verdict.warn b, .verdict.warn .k { color:var(--warn); }
+  .verdict.bad  { border-color:var(--bad);  background:var(--bad-bg); }
+  .verdict.bad b, .verdict.bad .k { color:var(--bad); }
+  .verdict i { color:var(--ink-2); }
+
+  .foot { font-size:13.5px; color:var(--ink-2); margin:12px 0 0; max-width:64ch; }
+  .foot strong { color:var(--ink); }
+  .empty { color:var(--ink-3); font-size:14px; margin:0; }
+
+  footer { margin-top:56px; padding-top:24px; border-top:1px solid var(--rule);
+           font-size:13.5px; color:var(--ink-3); }
+  footer a { color:var(--accent); }
+  footer p { max-width:66ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <p class="eyebrow">like petnames, but funkier</p>
+    <h1>funkynames</h1>
+    <p class="standfirst">
+      Three-word names from six curated pools — and, unusually, the arithmetic that says
+      what they're worth. A three-word name feels about as unguessable as a password.
+      It isn't, and the gap is where the bugs live.
+      <a href="https://github.com/frankie-muller/funkynames">Source on GitHub</a>.
+    </p>
+  </header>
+
+  <section>
+    <h2>Roll some</h2>
+    <p class="lede">Generated in your browser by the real library. Nothing is sent anywhere.</p>
+
+    <div class="ctl lengthbar">
+      <label for="min-len">Word length</label>
+      <select id="min-len" aria-label="Minimum word length"></select>
+      <span class="to">to</span>
+      <select id="max-len" aria-label="Maximum word length"></select>
+      <span class="pool-note" id="length-note"></span>
+    </div>
+    <div class="cols">
+      <div class="card">
+        <h3>Handles</h3>
+        <p class="sub">Three structured slots — descriptor, colour or action, place or thing. Reads like a name. No word repeats.</p>
+        <ul class="names" id="handle-list"></ul>
+        <button class="go" id="roll-handles" type="button">Roll again</button>
+      </div>
+      <div class="card">
+        <h3>Codes</h3>
+        <p class="sub">Flat draws from every pool at once. Any word, any position — worth more bits per word, reads less like a name.</p>
+        <ul class="names" id="code-list"></ul>
+        <div class="ctl">
+          <label for="code-words">Words</label>
+          <input type="range" id="code-words" min="2" max="8" value="4">
+          <output id="code-words-out">4</output>
+        </div>
+        <button class="go" id="roll-codes" type="button">Roll again</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Take it apart</h2>
+    <p class="lede">
+      Turn pools off, change the length, then set the attack you're worried about. The second
+      slider is the one people forget: an attacker doesn't want <em>your</em> name, they want
+      <em>any live one</em> — so a big keyspace gets diluted by a big population.
+    </p>
+
+    <div id="pool-toggles"></div>
+
+    <div class="ctl">
+      <label for="lab-words">Words</label>
+      <input type="range" id="lab-words" min="1" max="10" value="4">
+      <output id="lab-words-out">4</output>
+    </div>
+    <div class="ctl">
+      <label for="rate">Guess rate</label>
+      <input type="range" id="rate" min="0" max="100" value="45">
+      <output id="rate-out"></output>
+    </div>
+    <div class="ctl">
+      <label for="targets">Names outstanding</label>
+      <input type="range" id="targets" min="0" max="100" value="57">
+      <output id="targets-out"></output>
+    </div>
+
+    <div id="lab-readout" aria-live="polite"></div>
+  </section>
+
+  <section>
+    <h2>Is this safe for…</h2>
+    <p class="lede">Same settings as above, measured against what each use actually demands.</p>
+    <select id="use-case" aria-label="Use case"></select>
+    <div id="safety-readout" aria-live="polite" style="margin-top:16px"></div>
+  </section>
+
+  <footer>
+    <p>
+      <a href="https://github.com/frankie-muller/funkynames">GitHub</a> ·
+      MIT, code and word lists ·
+      built by <a href="https://www.singularcontinuum.com">Frank Müller</a>
+    </p>
+    <p>
+      Word pools are opinionated and were curated by hand for how they sound together, not for
+      coverage. 159 words appear in more than one pool; codes deduplicate them so every word is
+      equally likely, handles keep them but never repeat a word within one name.
+    </p>
+  </footer>
+
+</div>
+<script type="module" src="./demo.js"></script>
+</body>
+</html>

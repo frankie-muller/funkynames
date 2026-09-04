@@ -1,0 +1,7 @@
+{
+  // The demo is the only code here allowed to touch the DOM beyond the Crypto
+  // interface the core needs.
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "lib": ["ES2020", "DOM", "DOM.Iterable"], "noEmit": true },
+  "include": ["**/*.ts", "../src/**/*.ts"]
+}
