@@ -3,7 +3,7 @@
 [![verify](https://github.com/frankie-muller/funkynames/actions/workflows/verify.yml/badge.svg)](https://github.com/frankie-muller/funkynames/actions/workflows/verify.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-C2185B.svg)](LICENSE)
 
-**Like petnames, but funkier.** Three-word names from six hand-curated pools — and, unusually, the arithmetic that says what they're worth.
+**Like petnames, but funkier.** Readable handles and higher-entropy codes from six hand-curated pools — and, unusually, the arithmetic that says what they're worth.
 
 Everyone else pairs a plain adjective with a plain animal, so you get `happy-otter` until the heat death of the universe. These pools pull from martial arts, chess, dinosaurs, internet slang, retro-futurist transport and monster folklore from four continents.
 
@@ -76,9 +76,9 @@ Flat draws from every pool merged. Any word, any position: more bits per word, l
 import { codeEntropy, handleEntropy, timeToGuess, describeBits, wordsForBits } from 'funkynames';
 
 codeEntropy(4);
-// { keyspace: 28_721_292_600_625, bits: 44.71, birthday50: 6_309_952, readable: '28.7 trillion' }
+// { keyspace: 28_671_698_323_216, bits: 44.70, birthday50: 6_304_500, readable: '28.7 trillion' }
 
-describeBits(44.71);
+describeBits(44.70);
 // 'comparable to a 4-word Diceware passphrase — a reasonable rate-limited credential'
 
 wordsForBits(60);
@@ -157,11 +157,11 @@ Restricting word length narrows the pool, and the library reports the real numbe
 | 6–8 chars | 39.6 |
 | 7–8 chars | **32.1** |
 
-Long words only looks tidy and costs you twelve bits, because only 259 of 2,315 words qualify.
+Long words only looks tidy and costs you twelve bits, because only 259 of 2,314 words qualify.
 
 ## The words
 
-**6 pools · 2,487 words · 2,315 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
+**6 pools · 2,486 words · 2,314 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
 
 Most generators pair a plain adjective with a plain animal, so you get `happy-otter` and `brave-badger` forever. These pools pull from martial arts, chess, dinosaurs, internet slang, retro-futurist transport, workshop tools, root vegetables, and monster folklore from four continents. What comes out is odd on purpose.
 
@@ -189,7 +189,7 @@ Most generators pair a plain adjective with a plain animal, so you get `happy-ot
 
 > `susmax` · `okboom` · `stonks` · `yeet` · `drifter` · `telepod` · `warpjet` · `timecar` · `flycar` · `skybus` · `wormax`
 
-### 🌍 `biome` — 278
+### 🌍 `biome` — 277
 
 *Living and growing things.* Animals, then dinosaurs, then the entire vegetable aisle, then folklore creatures — with no dividing line between them.
 

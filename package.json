@@ -1,7 +1,7 @@
 {
   "name": "funkynames",
   "version": "0.1.0",
-  "description": "Like petnames, but funkier — three-word handles and codes from six curated pools, with the entropy arithmetic included.",
+  "description": "Like petnames, but funkier — readable handles and higher-entropy codes from six curated pools, with the entropy arithmetic included.",
   "keywords": [
     "names",
     "petnames",
