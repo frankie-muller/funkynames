@@ -112,7 +112,6 @@
     "velocir": "velociraptor",
     "plesio": "plesiosaur",
     "mosas": "mosasaurus",
-    "pachyr": "pachycephalosaurus",
     "carnot": "carnotaurus",
     "gorgo": "gorgosaurus",
     "cerato": "ceratosaurus",
@@ -181,7 +180,8 @@
     "adepta",
     "daemonh",
     "slasha",
-    "ankylo"
+    "ankylo",
+    "pachyr"
   ],
   "_keep_comment": "Flagged by the detector but correct as they stand — real words the archaic system dictionary lacks, deliberate slang, loanwords, proper nouns, or invented sci-fi material names. No change; listed so they are not re-flagged.",
   "keep": [

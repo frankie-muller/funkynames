@@ -76,7 +76,7 @@ Flat draws from every pool merged. Any word, any position: more bits per word, l
 import { codeEntropy, handleEntropy, timeToGuess, describeBits, wordsForBits } from 'funkynames';
 
 codeEntropy(4);
-// { keyspace: 28_671_698_323_216, bits: 44.70, birthday50: 6_304_500, readable: '28.7 trillion' }
+// { keyspace: 28_622_168_300_961, bits: 44.70, birthday50: 6_299_054, readable: '28.6 trillion' }
 
 describeBits(44.70);
 // 'comparable to a 4-word Diceware passphrase — a reasonable rate-limited credential'
@@ -157,11 +157,11 @@ Restricting word length narrows the pool, and the library reports the real numbe
 | 6–8 chars | 39.6 |
 | 7–8 chars | **32.1** |
 
-Long words only looks tidy and costs you twelve bits, because only 259 of 2,314 words qualify.
+Long words only looks tidy and costs you twelve bits, because only 259 of 2,313 words qualify.
 
 ## The words
 
-**6 pools · 2,486 words · 2,314 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
+**6 pools · 2,485 words · 2,313 distinct.** The pool names are portmanteaus, and they are load-bearing — each one describes a *register*, not a part of speech. That register is why the output doesn't sound like everything else.
 
 Most generators pair a plain adjective with a plain animal, so you get `happy-otter` and `brave-badger` forever. These pools pull from martial arts, chess, dinosaurs, internet slang, retro-futurist transport, workshop tools, root vegetables, and monster folklore from four continents. What comes out is odd on purpose.
 
@@ -189,7 +189,7 @@ Most generators pair a plain adjective with a plain animal, so you get `happy-ot
 
 > `susmax` · `okboom` · `stonks` · `yeet` · `drifter` · `telepod` · `warpjet` · `timecar` · `flycar` · `skybus` · `wormax`
 
-### 🌍 `biome` — 277
+### 🌍 `biome` — 276
 
 *Living and growing things.* Animals, then dinosaurs, then the entire vegetable aisle, then folklore creatures — with no dividing line between them.
 
@@ -250,9 +250,9 @@ The harness asserts word hygiene (no duplicates, no separators or capitals hidin
 
 ## Known gaps
 
-- **The corpus was repaired, not born clean.** The source lists had been truncated at roughly seven characters — a hard cliff in the length distribution, with longer words *chopped* rather than excluded. That left fragments like `hippogr`, `tricer` and `quetzco` sitting in the pools as if they were words. **139 were restored and 27 unrecoverable fragments dropped.** `scripts/repairs.json` records every decision, including the judgment calls: `iguan` became `iguanodon` rather than `iguana` because its neighbours are `trex` and `stego`, and `blackb` became `blackberry` rather than `blackbird` because its neighbours are `lychee` and `edamame`.
+- **The corpus was repaired, not born clean.** The source lists had been truncated at roughly seven characters — a hard cliff in the length distribution, with longer words *chopped* rather than excluded. That left fragments like `hippogr`, `tricer` and `quetzco` sitting in the pools as if they were words. **138 were restored and 28 unrecoverable fragments dropped.** `scripts/repairs.json` records every decision, including the judgment calls: `iguan` became `iguanodon` rather than `iguana` because its neighbours are `trex` and `stego`, and `blackb` became `blackberry` rather than `blackbird` because its neighbours are `lychee` and `edamame`.
 
-  Two survivors were found later, by reading the deployed demo's own output rather than by any test: `edmont` (the system dictionary has no dinosaur names, so the detector was blind to it) and `pachycephalosaur` — which was **my own repair, itself truncated**. Both are fixed. There may be more; the detector can only catch fragments that are prefixes of words a 1934 dictionary happens to contain.
+  Two survivors were found later, by reading the deployed demo's own output rather than by any test: `edmont` (the system dictionary has no dinosaur names, so the detector was blind to it) and `pachycephalosaur` — which was **my own repair, itself truncated**. `edmont` became `edmontosaurus`; `pachyr` was dropped instead, because its only honest expansion runs to eighteen characters, and a single word that long stretches the length filter for no benefit. There may be more; the detector can only catch fragments that are prefixes of words a 1934 dictionary happens to contain.
 
 - **159 words appear in two or more pools.** Codes deduplicate them so every word is equally likely; handles keep them, but never repeat a word inside one name.
 

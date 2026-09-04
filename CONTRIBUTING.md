@@ -30,7 +30,7 @@ If it's about a specific name, include the exact string and the options you pass
 ## House rules for word entries
 
 - **Lowercase, letters and digits only.** No spaces, no hyphens, no accents. A word containing the separator makes names ambiguous to split — the harness rejects this outright.
-- **Two to eighteen characters.** Most words are 4–7; the long tail is dinosaurs and mythology (`pachycephalosaurus`, `quetzalcoatl`). Callers who need short names filter with `minLength`/`maxLength`.
+- **Two to thirteen characters.** Most are 4–7; the long tail is dinosaurs and mythology (`edmontosaurus`, `quetzalcoatl`). A word so long it ends up the only one at its length gets dropped rather than kept — it stretches the length filter for nothing. Callers who want short names use `minLength`/`maxLength`.
 - **It has to sound good next to the others.** This is the actual bar. `quetzalcoatl` and `stonks` both earn their place; a technically valid word that's merely inoffensive doesn't.
 - **Right pool.** `ninjactives` describe, `verbtrics` move, `kawaiiolors` colour, `memactions` act, `biome` is places and living things, `monsterials` is monsters and materials.
 - **No duplicates within a pool.** Across pools is fine — 159 words already do it, and both generators handle it deliberately.
