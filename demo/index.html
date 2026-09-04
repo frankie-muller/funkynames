@@ -136,46 +136,6 @@
   .foot strong { color:var(--ink); }
   .empty { color:var(--ink-3); font-size:14px; margin:0; }
 
-  /* ── Picker ──────────────────────────────────────────────── */
-  .picks { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin:0 0 14px; }
-  .pick { display:flex; align-items:stretch; gap:4px; min-width:0;
-          background:var(--surface); border:1px solid var(--rule); border-radius:6px;
-          transition:border-color .12s, background .12s, box-shadow .12s; }
-  .pick:hover { border-color:var(--accent); }
-  .pick .choose { flex:1 1 auto; min-width:0; text-align:left; font:inherit; background:none; border:0;
-                  cursor:pointer; padding:14px 6px 14px 16px; border-radius:6px 0 0 6px; color:inherit; }
-  .pick .choose:focus-visible, .pick .star:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
-  .pick code { font-family:'IBM Plex Mono',monospace; font-size:15.5px; color:var(--ink);
-               background:none; padding:0; overflow-wrap:anywhere; }
-  .pick.starred { border-color:var(--accent); background:var(--accent-bg); }
-  .pick.selected { border-color:var(--accent); background:var(--accent-bg);
-                   box-shadow:inset 0 0 0 1px var(--accent), 0 0 0 3px var(--accent-bg); }
-  .pick .star { font-size:18px; line-height:1; background:none; border:0; cursor:pointer;
-                color:var(--ink-3); padding:4px 12px 4px 8px; border-radius:0 6px 6px 0; flex-shrink:0; }
-  .pick .star:hover { color:var(--accent); background:var(--surface-2); }
-  .pick.starred .star { color:var(--accent); }
-  .pickbar { margin-bottom:18px; }
-  .kbd { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-3); flex-basis:100%; }
-  @media (hover:none) { .kbd { display:none; } }
-  .no-clipboard [data-copy] { display:none; }
-  .hint { color:var(--ink-3); font-size:14px; margin:0; max-width:60ch; }
-  .chosen-card { background:var(--surface); border:2px solid var(--accent); border-radius:8px;
-                 padding:18px 20px; }
-  .chosen-name { display:flex; flex-wrap:wrap; align-items:flex-start; gap:2px 0; margin:6px 0 14px; }
-  .chosen-name .w { display:inline-flex; flex-direction:column; align-items:flex-start; min-width:0; }
-  .chosen-name .row { display:inline-flex; align-items:baseline; }
-  .chosen-name .w code { font-family:'Bricolage Grotesque',system-ui,sans-serif; font-weight:800;
-                          font-size:clamp(26px,4.6vw,44px); line-height:1; letter-spacing:-.02em;
-                          background:none; padding:0; color:var(--ink); }
-  .chosen-name .w small { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em;
-                           text-transform:uppercase; color:var(--accent); margin-top:5px; }
-  .chosen-name .sep { font-family:'Bricolage Grotesque',sans-serif; font-weight:800;
-                      font-size:clamp(26px,4.6vw,44px); line-height:1; color:var(--ink-3); margin:0 4px; }
-  .chosen-foot { display:flex; flex-wrap:wrap; align-items:center; gap:14px; min-width:0; }
-  .big-copy { flex:0 1 auto; min-width:0; max-width:100%; white-space:normal; }
-  .card.codes { max-width:560px; }
-  .card.codes .ctl { margin:0; }
-  .card.codes .ctl .go { margin-left:auto; }
 
   @media (max-width:420px) {
     .ctl input[type=range] { flex-basis:100%; order:2; }
@@ -209,20 +169,14 @@
     </p>
   </header>
 
-  <section id="pick-panel">
-    <h2>Pick a handle</h2>
+  <section>
+    <h2>Roll some</h2>
     <p class="lede">
       A handle is three words in a fixed order — a <em>descriptor</em>, then a <em>colour or
-      action</em>, then a <em>place or thing</em> — drawn from six pools that were curated for how
-      they sound together. The grammar is what makes it read like a name; no word ever repeats
-      inside one handle. Seven are generated below, in your browser, by the same library the
-      package ships. No name you generate leaves this page — the only thing it fetches is the typeface.
-    </p>
-    <p class="lede">
-      Read them aloud. <strong>Star the ones that stick, then reroll the rest</strong> — starred
-      handles stay put, everything else is replaced. After two or three rerolls, the one you can
-      still say without looking is the memorable one. Click it to choose it: you'll see which pool
-      each word came from, and how many handles were possible at this length range.
+      action</em>, then a <em>place or thing</em> — drawn from six pools curated for how they sound
+      together. A code is the other shape: flat draws from every pool at once, any word in any
+      position, more bits per word. Both are generated in your browser by the same library the
+      package ships; no name you generate leaves this page — the only thing it fetches is the typeface.
     </p>
 
     <div class="ctl lengthbar">
@@ -231,37 +185,24 @@
       <span class="to">to</span>
       <select id="max-len" aria-label="Maximum word length"></select>
       <span class="pool-note" id="length-note"></span>
-      <span class="scope">Applies to every panel on the page. Changing it deals a fresh seven; starred handles that still fit are kept.</span>
+      <span class="scope">Applies to every panel on the page.</span>
     </div>
-
-    <div class="picks" id="picks" role="group" aria-label="Handle options"></div>
-
-    <div class="ctl pickbar">
-      <button class="go" id="reroll" type="button">Reroll all seven</button>
-      <button class="ghost" id="clear-stars" type="button" disabled>Clear stars</button>
-      <span class="pool-note" id="pick-note"></span>
-      <span class="kbd">Keyboard: Tab between options, Enter on a name to choose it, Enter on ☆ or S to star</span>
-    </div>
-
-    <div id="chosen"></div>
-  </section>
-
-  <section>
-    <h2>Roll some codes</h2>
-    <p class="lede">
-      Codes are the other shape. Where a handle keeps a grammar, a code draws every word from all
-      six pools merged, in any order, with repeats allowed — so it reads less like a name and more
-      like a passphrase, and each word is worth more bits. Use handles for things people will
-      say and remember; use codes for invite links, room codes and anything a stranger might try
-      to guess. The slider sets how many words; the "Take it apart" panel below shows what each
-      extra word buys you.
-    </p>
-    <div class="card codes">
-      <ul class="names" id="code-list"></ul>
-      <div class="ctl">
-        <label for="code-words">Words per code</label>
-        <input type="range" id="code-words" min="2" max="8" value="4">
-        <output id="code-words-out">4</output>
+    <div class="cols">
+      <div class="card">
+        <h3>Handles</h3>
+        <p class="sub">Three structured slots — descriptor, colour or action, place or thing. Reads like a name. No word repeats.</p>
+        <ul class="names" id="handle-list"></ul>
+        <button class="go" id="roll-handles" type="button">Roll again</button>
+      </div>
+      <div class="card">
+        <h3>Codes</h3>
+        <p class="sub">Flat draws from every pool at once. Any word, any position — worth more bits per word, reads less like a name.</p>
+        <ul class="names" id="code-list"></ul>
+        <div class="ctl">
+          <label for="code-words">Words per code</label>
+          <input type="range" id="code-words" min="2" max="8" value="4">
+          <output id="code-words-out">4</output>
+        </div>
         <button class="go" id="roll-codes" type="button">Roll again</button>
       </div>
     </div>

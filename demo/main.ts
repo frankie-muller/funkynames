@@ -1,13 +1,12 @@
 /**
  * The funkynames demo — the real library, running in your browser.
  *
- * Four panels: pick a handle from seven, roll some codes, take the entropy
- * apart, then ask whether the shape you picked is strong enough for what you
- * want to use it for.
+ * Three panels: roll some handles and codes, take the entropy apart, then ask
+ * whether the shape you picked is strong enough for what you want to use it for.
  */
 import {
   POOLS, POOL_NAMES, type PoolName,
-  generateHandle, generateCode, parseName,
+  generateHandle, generateCode,
   handleEntropy, entropyOfDraws,
   timeToGuess, describeBits, humanizeSeconds,
   withinLength,
@@ -61,9 +60,6 @@ function lengthRange(): { minLength: number; maxLength: number } {
   return { minLength: lo, maxLength: hi };
 }
 
-const fitsRange = (handle: string, r: { minLength: number; maxLength: number }) =>
-  handle.split('-').every((w) => w.length >= r.minLength && w.length <= r.maxLength);
-
 function onLengthChange(): void {
   const range = lengthRange();
   const kept = withinLength([...new Set(POOL_NAMES.flatMap((n) => [...POOLS[n]]))], range).length;
@@ -71,12 +67,7 @@ function onLengthChange(): void {
   const pct = Math.round((kept / total) * 100);
   lengthNote.textContent = `${kept.toLocaleString('en-US')} of ${total.toLocaleString('en-US')} words (${pct}%)`;
   lengthNote.classList.toggle('warn', pct < 25);
-  // Starred handles that still fit the new range survive; the rest are dealt
-  // again. A star should mean what the tooltip says it means.
-  picks = picks.filter((p) => p.starred && fitsRange(p.handle, range));
-  if (chosen && !picks.some((p) => p.handle === chosen)) { chosen = null; }
-  rerolls = 0;
-  reroll();
+  rollHandles();
   rollCodes();
   syncLab();
   syncSafety();
@@ -85,198 +76,32 @@ function onLengthChange(): void {
 minLen.addEventListener('change', onLengthChange);
 maxLen.addEventListener('change', onLengthChange);
 
-// ── Panel 1: Pick a handle ───────────────────────────────────────────────────
-// Seven options, the same count the library's discovery flow uses. Star what
-// sticks, reroll the rest; the one you can still remember after a few rerolls
-// is the memorable one. Choosing a handle stars it, so a reroll can never take
-// away the one you picked.
+function row(name: string): string {
+  return `<li><code>${esc(name)}</code><button class="copy" data-copy="${esc(name)}" type="button" aria-label="Copy ${esc(name)}">copy</button></li>`;
+}
 
-const PICK_COUNT = 7;
-const picksEl = $('picks');
-const chosenEl = $('chosen');
-const pickNote = $('pick-note');
-const rerollBtn = $<HTMLButtonElement>('reroll');
-const clearBtn = $<HTMLButtonElement>('clear-stars');
+// ── Panel 1: Handles ─────────────────────────────────────────────────────────
 
-interface Pick { handle: string; starred: boolean }
-let picks: Pick[] = [];
-let chosen: string | null = null;
-let rerolls = 0;
-/** Set when the length range makes handles impossible; owns the whole panel until cleared. */
-let pickError: string | null = null;
+const handleList = $('handle-list');
 
-/** A fresh handle not already on the board. Bounded, so a tiny range can't spin. */
-function freshHandle(taken: Set<string>): string | null {
+function rollHandles(): void {
   const opts = lengthRange();
-  for (let i = 0; i < 40; i++) {
-    const h = generateHandle(opts);
-    if (!taken.has(h)) { return h; }
-  }
-  return null;
-}
-
-/** Replace every unstarred option with a fresh one. Starred ones stay put. */
-function reroll(): void {
-  const taken = new Set(picks.filter((p) => p.starred).map((p) => p.handle));
-  const next: Pick[] = [];
-  let short = 0;
   try {
-    for (let i = 0; i < PICK_COUNT; i++) {
-      const existing = picks[i];
-      if (existing?.starred) { next.push(existing); continue; }
-      const h = freshHandle(taken);
-      // `continue`, not `break`: a starred card at a later index must survive
-      // even when the range is too small to fill every slot.
-      if (!h) { short++; continue; }
-      taken.add(h);
-      next.push({ handle: h, starred: false });
-    }
-    pickError = null;
+    handleList.innerHTML = Array.from({ length: 6 }, () => row(generateHandle(opts))).join('');
   } catch (err) {
-    // A narrow range can empty a whole slot (nothing 12+ letters in the
-    // descriptor pools) even though the merged pool still has words. The
-    // library refuses rather than guesses; say so in the page's own words.
-    pickError = `Handles need a word in every slot, and nothing in the current range fits the descriptor slot. Widen the word length above — codes below still work. (${(err as Error).message.replace(/^funkynames: /, '')})`;
-    picks = picks.filter((p) => p.starred);
-    renderPicks();
-    renderChosen();
-    return;
+    // A narrow range can empty a slot even when the merged pool still has words
+    // in range — the library refuses rather than guesses.
+    handleList.innerHTML = `<li class="empty">${esc((err as Error).message.replace(/^funkynames: /, ''))}</li>`;
   }
-  if (picks.length) { rerolls++; }
-  picks = next;
-  if (chosen && !picks.some((p) => p.handle === chosen)) { chosen = null; }
-  renderPicks(short);
-  renderChosen();
 }
 
-function renderPicks(short = 0): void {
-  if (pickError) {
-    picksEl.innerHTML = `<p class="empty">${esc(pickError)}</p>`;
-    pickNote.textContent = '';
-    rerollBtn.disabled = true;
-    rerollBtn.textContent = 'Reroll all seven';
-    clearBtn.disabled = true;
-    return;
-  }
+$('roll-handles').addEventListener('click', rollHandles);
 
-  // Each card is two real buttons, siblings, so every control has native
-  // keyboard behaviour and an accessible name — no ARIA listbox to emulate.
-  picksEl.innerHTML = picks.map((p, i) => `
-    <div class="pick${p.starred ? ' starred' : ''}${p.handle === chosen ? ' selected' : ''}" data-i="${i}">
-      <button class="choose" type="button" data-handle="${esc(p.handle)}" data-i="${i}"
-              aria-pressed="${p.handle === chosen}" aria-label="${p.handle === chosen ? 'Chosen: ' : 'Choose '}${esc(p.handle)}">
-        <code>${esc(p.handle)}</code>
-      </button>
-      <button class="star" type="button" data-star="${i}"
-              aria-pressed="${p.starred}" aria-label="${p.starred ? 'Unstar' : 'Star'} ${esc(p.handle)}"
-              title="${p.starred ? 'Unstar — it can be rerolled again' : 'Star — keep it through rerolls'}">${p.starred ? '★' : '☆'}</button>
-    </div>`).join('');
-
-  const starred = picks.filter((p) => p.starred).length;
-  const parts: string[] = [];
-  if (starred) { parts.push(`${starred} starred`); }
-  if (rerolls) { parts.push(`${rerolls} reroll${rerolls === 1 ? '' : 's'}`); }
-  if (short) { parts.push(`only ${picks.length} distinct handles fit this range`); }
-  pickNote.textContent = parts.join(' · ');
-  clearBtn.disabled = starred === 0;
-  const allStarred = starred === PICK_COUNT;
-  rerollBtn.textContent = allStarred ? 'All starred' : starred ? 'Reroll the unstarred' : 'Reroll all seven';
-  rerollBtn.disabled = allStarred;
-}
-
-function renderChosen(): void {
-  if (!chosen) {
-    chosenEl.innerHTML = `<p class="hint">Click one to choose it. Read them aloud first — the memorable one is the one you can still say after the others are gone.</p>`;
-    return;
-  }
-  const parsed = parseName(chosen);
-  const words = parsed
-    ? parsed.words.map((w, i) => `<span class="w"><span class="row"><code>${esc(w.word)}</code>${i < parsed.words.length - 1 ? '<span class="sep">-</span>' : ''}</span><small>${esc(w.pools.join(' / '))}</small></span>`).join('')
-    : `<code>${esc(chosen)}</code>`;
-
-  // The possibility count is measured at the SAME length range the handle was
-  // drawn from — anything else would be a different keyspace.
-  let possible = '';
-  try {
-    const h = handleEntropy(lengthRange());
-    possible = `one of ${h.readable} possible at this length range · ${h.bits.toFixed(1)} bits`;
-  } catch { possible = ''; }
-
-  chosenEl.innerHTML = `
-    <div class="chosen-card">
-      <span class="k">Your handle</span>
-      <div class="chosen-name">${words}</div>
-      <div class="chosen-foot">
-        <button class="go big-copy" type="button" data-copy="${esc(chosen)}" aria-label="Copy ${esc(chosen)}">Copy</button>
-        ${possible ? `<span class="pool-note">${possible}</span>` : ''}
-      </div>
-    </div>`;
-}
-
-function focusPick(selector: string): void {
-  (picksEl.querySelector(selector) as HTMLElement | null)?.focus();
-}
-
-function choose(i: number): void {
-  const p = picks[i];
-  if (!p) { return; }
-  chosen = p.handle;
-  p.starred = true; // choosing keeps it — a reroll must never remove the one you picked
-  renderPicks();
-  renderChosen();
-  announce(`Chosen ${p.handle}`);
-  focusPick(`.choose[data-i="${i}"]`);
-}
-
-function toggleStar(i: number): void {
-  const p = picks[i];
-  if (!p) { return; }
-  p.starred = !p.starred;
-  if (!p.starred && chosen === p.handle) { chosen = null; renderChosen(); }
-  renderPicks();
-  announce(`${p.starred ? 'Starred' : 'Unstarred'} ${p.handle}`);
-  focusPick(`.star[data-star="${i}"]`);
-}
-
-picksEl.addEventListener('click', (e) => {
-  const target = e.target as HTMLElement;
-  const star = target.closest('.star') as HTMLButtonElement | null;
-  if (star) { toggleStar(Number(star.dataset.star)); return; }
-  const ch = target.closest('.choose') as HTMLButtonElement | null;
-  if (ch) { choose(Number(ch.dataset.i)); }
-});
-
-// Both controls are buttons, so Enter and Space already work natively. The
-// only extra is S on a focused card, and only without a modifier so Cmd+S is
-// still the browser's.
-picksEl.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() !== 's' || e.metaKey || e.ctrlKey || e.altKey) { return; }
-  const card = (e.target as HTMLElement).closest('.pick') as HTMLElement | null;
-  if (!card) { return; }
-  e.preventDefault();
-  toggleStar(Number(card.dataset.i));
-});
-
-rerollBtn.addEventListener('click', () => { reroll(); announce(`Dealt ${picks.filter((p) => !p.starred).length} new handles`); });
-clearBtn.addEventListener('click', () => {
-  // This button disables itself; move focus first so it is not dropped.
-  rerollBtn.focus();
-  for (const p of picks) { p.starred = false; }
-  chosen = null;
-  renderPicks();
-  renderChosen();
-  announce('Stars cleared');
-});
-
-// ── Panel 2: Codes ───────────────────────────────────────────────────────────
+// ── Codes ───────────────────────────────────────────────────────────
 
 const codeList = $('code-list');
 const codeWords = $<HTMLInputElement>('code-words');
 const codeWordsOut = $('code-words-out');
-
-function row(name: string): string {
-  return `<li><code>${esc(name)}</code><button class="copy" data-copy="${esc(name)}" type="button" aria-label="Copy ${esc(name)}">copy</button></li>`;
-}
 
 function rollCodes(): void {
   const words = Number(codeWords.value);
@@ -327,7 +152,7 @@ document.addEventListener('click', (e) => {
     .catch(() => { restore('copy failed'); announce('Copy failed'); });
 });
 
-// ── Panel 3: Entropy lab ─────────────────────────────────────────────────────
+// ── Entropy lab ─────────────────────────────────────────────────────
 
 const poolToggles = $('pool-toggles');
 const labWords = $<HTMLInputElement>('lab-words');
@@ -439,7 +264,7 @@ for (const el of [labWords, rate, targets]) {
   el.addEventListener('change', announceLab);
 }
 
-// ── Panel 4: Is this safe for… ───────────────────────────────────────────────
+// ── Is this safe for… ───────────────────────────────────────────────
 
 interface UseCase {
   id: string;
@@ -541,4 +366,4 @@ useCaseSelect.addEventListener('change', syncSafety);
 
 // ── Open on something real ───────────────────────────────────────────────────
 
-onLengthChange(); // fills the note, deals the first seven, rolls the codes, syncs both readouts
+onLengthChange(); // fills the note, rolls both lists, syncs both readouts
