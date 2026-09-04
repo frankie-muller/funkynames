@@ -241,7 +241,7 @@ function syncLab(): void {
       <div><span class="k">Pool</span><b>${fmt(poolSize)}</b><i>distinct words in range</i></div>
       <div><span class="k">Keyspace</span><b>${e.readable}</b><i>${exact(e.keyspace)}</i></div>
       <div><span class="k">Entropy</span><b>${e.bits.toFixed(1)} bits</b><i>${describeBits(e.bits)}</i></div>
-      <div><span class="k">Collides after</span><b>${fmt(e.birthday50)}</b><i>names, 50% chance — the birthday bound, not the keyspace</i></div>
+      <div><span class="k">Collides after</span><b>${exact(e.birthday50)}</b><i>names, 50% chance — the birthday bound, not the keyspace</i></div>
     </div>
     <div class="verdict ${band}">
       <span class="k">Expected time to guess one live name</span>
@@ -283,8 +283,8 @@ interface UseCase {
 const USE_CASES: UseCase[] = [
   { id: 'username', label: 'Username or display handle', bits: 0, rateLimited: false,
     plainWhy: 'Everyone can already see it, so nobody gains anything by guessing it — the only thing that can go wrong is handing two people the same name, and you catch that by checking when you issue one.' },
-  { id: 'room', label: 'Room / lobby code', bits: 28, rateLimited: true,
-    plainWhy: 'A stranger who guesses it can walk into the game, but the room dies within the hour and there\'s little to steal, so a few hundred million possibilities (28 bits — about a 9-digit number) is plenty, as long as rooms really do expire and you slow down repeated join attempts.' },
+  { id: 'room', label: 'Room / lobby code', bits: 30, rateLimited: true,
+    plainWhy: 'A stranger who guesses it can walk into the game, but the room dies within the hour and there\'s little to steal, so just over a billion possibilities (30 bits — about a 10-digit number) is plenty, as long as rooms really do expire and you slow down repeated join attempts.' },
   { id: 'invite', label: 'Invite or share link', bits: 45, rateLimited: true,
     plainWhy: 'It lives for months, it opens a door, and thousands may be out there at once — a guesser only has to hit any one of them — so it needs about 35 trillion possibilities (45 bits — roughly an 8-character random password).' },
   { id: 'reset', label: 'Password reset token', bits: 60, rateLimited: true,
@@ -379,23 +379,25 @@ function syncSafety(): void {
   const e = entropyOfDraws(poolSize, words);
   const ok = e.bits >= useCase.bits;
   const atk = attackModel(e.keyspace);
-  const wanted = logScale(Number(targets.value), 0, 7);
   const guess = timeToGuess(e.keyspace, atk.perSec, atk.targets);
   const slow = timeToGuess(e.keyspace, 1 / 60, atk.targets);
   const tries = atk.clamped ? 'just one' : about(guess.attempts);
   const clampedNote = atk.clamped ? ' There are more live codes out there than there are possible codes, so every single guess lands on someone\'s.' : '';
-  const attack = `Someone guessing at random — ${guesses(atk.perSec)}, with ${plural(wanted, 'live code')} any one of which counts as a hit — should expect to land one after ${tries} guesses, ${dur(guess.seconds)}.${clampedNote}`;
+  // atk.targets, not the raw slider value: once clamped it IS the number
+  // the guess/slow calculations below actually used, and the prose has to
+  // describe the same attack it's reporting numbers for.
+  const attack = `Someone guessing at random — ${guesses(atk.perSec)}, with ${plural(atk.targets, 'live code')} any one of which counts as a hit — should expect to land one after ${tries} guesses, ${dur(guess.seconds)}.${clampedNote}`;
 
   const rateLine = useCase.rateLimited
     ? `<p class="foot">The cheap half of the answer: you decide how fast people are allowed to guess. Let them try once a minute instead of ${atk.perSec === 1 ? 'once' : `${fmt(atk.perSec)} times`} a second and the same ${words}-word codes hold out for ${dur(slow.seconds)} instead of ${dur(guess.seconds)}. That isn\'t a bonus on top of the maths — it\'s half of it, and the bar for this use assumes you\'re doing it. If a code lives longer than ${dur(guess.seconds)} and you have no throttle, treat the answer as no.</p>`
     : '';
 
   if (ok) {
-    const why = `a ${words}-word code from these pools is ${compare(e.bits)} (${e.bits.toFixed(1)} bits; this use needs ${useCase.bits}), so there are more possible codes than the job calls for. With ${plural(wanted, 'live code')} out there and ${guesses(atk.perSec)}, someone guessing at random should expect their first hit after ${tries} guesses — ${dur(guess.seconds)}.`;
+    const why = `a ${words}-word code from these pools is ${compare(e.bits)} (${e.bits.toFixed(1)} bits; this use needs ${useCase.bits}), so there are more possible codes than the job calls for. With ${plural(atk.targets, 'live code')} out there and ${guesses(atk.perSec)}, someone guessing at random should expect their first hit after ${tries} guesses — ${dur(guess.seconds)}.`;
     if (guess.seconds < 86_400) {
       // The lab's own "bad" band: the bits clear the bar but the sliders beat it.
       out.innerHTML = card('warn', `Yes, but — ${plural(words, 'word')} clears the bar, and these sliders still beat it.`, why,
-        `careful — enough bits does not mean safe at these slider settings. ${plural(wanted, 'live code')} and ${guesses(atk.perSec)} still means a hit in ${dur(guess.seconds)}. Expire old codes, or slow the guesser down (see the note below); one extra word also multiplies the time by the size of the pool.`)
+        `careful — enough bits does not mean safe at these slider settings. ${plural(atk.targets, 'live code')} and ${guesses(atk.perSec)} still means a hit in ${dur(guess.seconds)}. Expire old codes, or slow the guesser down (see the note below); one extra word also multiplies the time by the size of the pool.`)
         + `<p class="foot">${useCase.plainWhy}</p>${rateLine}`;
       return;
     }

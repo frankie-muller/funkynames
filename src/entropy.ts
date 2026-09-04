@@ -35,6 +35,13 @@ export interface EntropyReport {
 }
 
 const SCALES: ReadonlyArray<readonly [number, string]> = [
+  [1e33, 'decillion'],
+  [1e30, 'nonillion'],
+  [1e27, 'octillion'],
+  [1e24, 'septillion'],
+  [1e21, 'sextillion'],
+  [1e18, 'quintillion'],
+  [1e15, 'quadrillion'],
   [1e12, 'trillion'],
   [1e9, 'billion'],
   [1e6, 'million'],
@@ -43,7 +50,15 @@ const SCALES: ReadonlyArray<readonly [number, string]> = [
 
 function readableCount(n: number): string {
   for (const [size, label] of SCALES) {
-    if (n >= size) { return `${(n / size).toFixed(1)} ${label}`; }
+    if (n < size) { continue; }
+    const mantissa = n / size;
+    // A "human-readable" label only means something while the mantissa
+    // stays under 1000 — past that, the true name is a rung this table
+    // does not have (or never could: keyspaces are unbounded). Scientific
+    // notation past the largest named scale is honest; a made-up word or
+    // a mis-scaled one is not.
+    if (!(mantissa < 1000)) { return n.toExponential(1); }
+    return `${mantissa.toFixed(1)} ${label}`;
   }
   return String(Math.round(n));
 }
@@ -76,8 +91,8 @@ export function entropyOfSlots(slotSizes: readonly number[]): EntropyReport {
  * are built. With replacement is not a bug: forbidding repeats would shrink
  * the keyspace, not grow it.
  *
- *   entropyOfDraws(2516, 3)  // -> 33.6 bits
- *   entropyOfDraws(2516, 4)  // -> 44.9 bits, for one more word
+ *   entropyOfDraws(2516, 3)  // -> 33.9 bits
+ *   entropyOfDraws(2516, 4)  // -> 45.2 bits, for one more word
  */
 export function entropyOfDraws(poolSize: number, draws: number): EntropyReport {
   if (!Number.isInteger(draws) || draws < 0) {

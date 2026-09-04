@@ -8,6 +8,7 @@
 import { mergePools } from './code.js';
 import { POOLS, POOL_NAMES, type PoolName } from './pools.js';
 import { entropyOfDraws, type EntropyReport } from './entropy.js';
+import { withinLength, type LengthOptions } from './random.js';
 
 /**
  * How many words to reach a target strength.
@@ -25,12 +26,15 @@ import { entropyOfDraws, type EntropyReport } from './entropy.js';
  */
 export function wordsForBits(
   targetBits: number,
-  options: { dedupe?: boolean } = {},
+  options: LengthOptions & { dedupe?: boolean } = {},
 ): { words: number; achieved: EntropyReport } {
   if (!Number.isFinite(targetBits) || targetBits < 0) {
     throw new RangeError('funkynames: targetBits must be a non-negative number');
   }
-  const poolSize = mergePools(options.dedupe ?? true).length;
+  // Must match codeEntropy's pool exactly: a length filter shrinks the real
+  // draw pool, and a floor computed against the unfiltered pool is not a
+  // floor for the code you actually generate with the same options.
+  const poolSize = withinLength(mergePools(options.dedupe ?? true), options).length;
   const bitsPerWord = Math.log2(poolSize);
   const words = Math.max(1, Math.ceil(targetBits / bitsPerWord));
   return { words, achieved: entropyOfDraws(poolSize, words) };
