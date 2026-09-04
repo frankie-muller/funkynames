@@ -250,10 +250,17 @@ The harness asserts word hygiene (no duplicates, no separators or capitals hidin
 
 ## Known gaps
 
-- **159 words appear in two or more pools.** Codes deduplicate them so every word is equally likely; handles keep them but never repeat a word inside one name.
-- **9 words are two characters** (`gm`, `im`, `fm`, `cm`, `fr`, `gg`, `pi`, `ox`, `ok`). Some are deliberate, some are probably noise.
-- **The corpus was repaired, not born clean.** The source lists had been truncated at about seven characters, leaving fragments like `hippogr` and `tricer`. 136 were restored and 26 unrecoverable fragments dropped; `scripts/repairs.json` records every decision.
-- **Opinionated and uneven.** Heavy on martial arts, chess, dinosaurs, mythology and internet slang. It reflects one person's taste, which is why the names have a voice.
+- **The corpus was repaired, not born clean.** The source lists had been truncated at roughly seven characters — a hard cliff in the length distribution, with longer words *chopped* rather than excluded. That left fragments like `hippogr`, `tricer` and `quetzco` sitting in the pools as if they were words. **139 were restored and 27 unrecoverable fragments dropped.** `scripts/repairs.json` records every decision, including the judgment calls: `iguan` became `iguanodon` rather than `iguana` because its neighbours are `trex` and `stego`, and `blackb` became `blackberry` rather than `blackbird` because its neighbours are `lychee` and `edamame`.
+
+  Two survivors were found later, by reading the deployed demo's own output rather than by any test: `edmont` (the system dictionary has no dinosaur names, so the detector was blind to it) and `pachycephalosaur` — which was **my own repair, itself truncated**. Both are fixed. There may be more; the detector can only catch fragments that are prefixes of words a 1934 dictionary happens to contain.
+
+- **159 words appear in two or more pools.** Codes deduplicate them so every word is equally likely; handles keep them, but never repeat a word inside one name.
+
+- **9 words are two characters** — `gm`, `im`, `fm`, `cm`, `fr`, `gg`, `pi`, `ox`, `ok`. Some are deliberate (chess titles, an ox), some are probably noise, and I've left them rather than guess which is which.
+
+- **Opinionated and uneven.** Heavy on martial arts, chess, dinosaurs, mythology and internet slang; thin on almost everything else. It reflects one person's taste, which is exactly why the names have a voice — a balanced corpus would produce blander names.
+
+- **The word lists are public**, so `parseName` proves shape and never identity. Anyone can assemble a valid-looking name from the README.
 
 ## License
 
