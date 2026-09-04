@@ -36,6 +36,29 @@ function slotWords(slot: readonly PoolName[]): string[] {
 }
 
 /**
+ * A slot's words within the length range — and if there are none, an error
+ * that says WHICH slot, because "no words between 12 and 12 characters" is
+ * false for the corpus as a whole and only true of one slot. A handle needs a
+ * word in every slot; a code does not, which is why the message points there.
+ */
+function slotWordsInRange(slot: readonly PoolName[], options: LengthOptions): string[] {
+  try {
+    return withinLength(slotWords(slot), options);
+  } catch (err) {
+    if (err instanceof RangeError && (options.minLength !== undefined || options.maxLength !== undefined)) {
+      const lo = options.minLength ?? 2;
+      const hi = options.maxLength ?? 'any';
+      throw new RangeError(
+        `funkynames: no words between ${lo} and ${hi} characters in the ` +
+        `${slot.join(' + ')} slot — a handle needs a word in every slot. ` +
+        'Widen the range, or use generateCode(), which draws from all pools at once.',
+      );
+    }
+    throw err;
+  }
+}
+
+/**
  * One handle.
  *
  * No word appears twice. 124 words sit in pools feeding DIFFERENT slots
@@ -52,7 +75,7 @@ export function generateHandle(options: HandleOptions = {}): string {
   const chosen: string[] = [];
 
   for (const slot of HANDLE_SLOTS) {
-    const words = withinLength(slotWords(slot), options);
+    const words = slotWordsInRange(slot, options);
     let word = pick(words, options);
     // Bounded: with an injected `random` that returns a constant, this would
     // otherwise spin forever. After the cap, accept the repeat rather than
@@ -104,13 +127,13 @@ export function generateHandles(count: number, options: HandleOptions = {}): str
  * must never be wrong in, so the loss is subtracted rather than ignored.
  */
 export function handleEntropy(options: LengthOptions = {}): EntropyReport {
-  const sizes = HANDLE_SLOTS.map((slot) => withinLength(slotWords(slot), options).length);
+  const sizes = HANDLE_SLOTS.map((slot) => slotWordsInRange(slot, options).length);
   const raw = entropyOfSlots(sizes);
 
   // Fraction of combinations containing a repeated word, summed pairwise over
   // slots. Pairs are disjoint enough at these sizes that inclusion-exclusion
   // beyond the first term is noise.
-  const sets = HANDLE_SLOTS.map((slot) => new Set(withinLength(slotWords(slot), options)));
+  const sets = HANDLE_SLOTS.map((slot) => new Set(slotWordsInRange(slot, options)));
   let collisionFraction = 0;
   for (let i = 0; i < sets.length; i++) {
     for (let j = i + 1; j < sets.length; j++) {
